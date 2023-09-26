@@ -1,7 +1,4 @@
 {
-  inputs,
-  lib,
-  config,
   pkgs,
   ...
 }: {
@@ -14,6 +11,7 @@
 
     # social
     discord
+    slack
 
     # archives
     zip

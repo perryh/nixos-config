@@ -18,6 +18,7 @@
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
+    ./home-manager.nix
   ];
 
   nixpkgs = {
@@ -138,7 +139,7 @@
     description = "Perry Huang";
     extraGroups = [ "networkmanager" "wheel" ];
     openssh.authorizedKeys.keys = [
-      # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII43Gtye1YgX+KyUWZLVpVRJ6Jc+BOBacQrKfmRjbe64 perry.huang@gmail.com"
     ];
   };
 
