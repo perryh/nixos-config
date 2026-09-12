@@ -2,7 +2,7 @@
 # Host-specific user tweaks belong in hosts/<name>.nix under
 # home-manager.users.perryh = { ... }.
 { pkgs, ... }: {
-  home.stateVersion = "25.11";
+  home.stateVersion = "26.05";
 
   home.packages = with pkgs; [
     ripgrep
