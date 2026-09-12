@@ -1,7 +1,26 @@
 # Shared across ALL hosts — anything that should be identical on every machine.
 # Desktop/GUI-related options live here too, so every machine gets the same
 # stack; override in hosts/<name>.nix if a machine differs (e.g. headless).
-{ config, pkgs, ... }: {
+#
+# Package groups: pick per-host which named groups (common/pkg-groups.nix) to
+# install via perry.systemGroups. Default = all groups (desktop). A headless
+# server would set:  perry.systemGroups = [ "dev" "containers" ];
+{ config, pkgs, lib, ... }:
+
+let
+  groups = import ./pkg-groups.nix { inherit pkgs; };
+  enabledGroups = map (g:
+    groups.${g} or (throw "perry.systemGroups: unknown group '${g}' (valid: ${lib.concatStringsSep ", " (lib.attrNames groups))})"
+  ) config.perry.systemGroups;
+in
+{
+
+  options.perry.systemGroups = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = lib.attrNames groups;
+    example = [ "dev" "containers" ];
+    description = "Which named package groups (common/pkg-groups.nix) to install. Headless hosts drop the GUI groups.";
+  };
 
   system.stateVersion = "26.05";
   time.timeZone = "America/Los_Angeles";
@@ -44,13 +63,16 @@
   };
 
   # --- shared system packages (identical versions on every host) ---
-  environment.systemPackages = with pkgs; [
-    git
-    gh
-    neovim
-    curl
-    jq
-  ];
+  # Base set is always present; named groups are selected by perry.systemGroups.
+  # (git comes from gitAndTools in the "dev" group — no bare `git` needed.)
+  environment.systemPackages =
+    with pkgs; [
+      gh
+      neovim
+      curl
+      jq
+    ]
+    ++ builtins.concatLists enabledGroups;
 
   # --- networking ---
   networking.networkmanager.enable = true;
@@ -82,7 +104,9 @@
   };
 
   # --- browsers ---
-  programs.firefox.enable = true;
+  # Tied to the "browsers" group so headless hosts (which drop GUI groups)
+  # don't still get a browser.
+  programs.firefox.enable = lib.elem "browsers" config.perry.systemGroups;
 
   # --- shared user/home config via home-manager ---
   home-manager.useGlobalPkgs = true;
