@@ -1,0 +1,8 @@
+# Nix
+.nix-channels/
+result
+.direnv/
+
+# local / machine-specific stuff that should never be committed
+local/
+*.local.nix
