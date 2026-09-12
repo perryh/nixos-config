@@ -17,12 +17,13 @@ machine; per-host files hold hostname + hardware specifics.
 
 ## First boot on a machine
 
-1. Clone this repo to `~/nix-config` (flakes are enabled by default since 24.11)
+1. Clone this repo to `~/nix-config` (flakes are enabled by default on 25.05+)
 2. `sudo nixos-generate-config` → move `/etc/nixos/hardware-configuration.nix`
    into the repo as `hosts/<name>-hardware.nix`
-3. Capture the existing password hash before the first flake build
-   (`getent shadow <user> | cut -d: -f2`) and set it as `initialHash` in
-   `common/common.nix`, otherwise the rebuild fails
+3. (Only if the user doesn't exist on the system yet) set `initialHash` in
+   `common/common.nix` from `getent shadow <user> | cut -d: -f2`, otherwise
+   the rebuild fails with "has no password hash". Existing users keep their
+   password when `initialHash = ""`.
 4. `sudo nixos-rebuild switch --flake ~/nix-config#<name>`
 
 First build compiles the whole closure — takes a while. After that,
