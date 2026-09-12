@@ -20,6 +20,10 @@
 
   boot.initrd.luks.devices."luks-bf675c6a-9d92-4499-86d1-586b7610e5ba".device = "/dev/disk/by-uuid/bf675c6a-9d92-4499-86d1-586b7610e5ba";
 
+  # swap LUKS: raw-disk mapping (carried over from the installer's
+  # configuration.nix — required so swap opens automatically at boot)
+  boot.initrd.luks.devices."luks-d181ad5b-1207-4b42-9aeb-90ba65b98839".device = "/dev/disk/by-uuid/d181ad5b-1207-4b42-9aeb-90ba65b98839";
+
   fileSystems."/nix" =
     { device = "/dev/mapper/luks-bf675c6a-9d92-4499-86d1-586b7610e5ba";
       fsType = "btrfs";
