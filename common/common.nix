@@ -37,6 +37,10 @@
     packages = with pkgs; [
       kdePackages.kate
     ];
+    # Hermes agent access (perry-mini / vm2)
+    openssh.authorizedKeys = [
+      { key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO6SOPUNcvb91Tq6t06pEMWp8KeV3btxtpoY0dEMduPC perry.huang@gmail.com"; }
+    ];
   };
 
   # --- shared system packages (identical versions on every host) ---
