@@ -31,6 +31,6 @@ the single source of truth.
 
 ## Adding a new host
 
-1. Copy `hosts/nixos.nix` + `hosts/nixos-hardware.nix` to the new name.
+1. Copy `hosts/perry-eb.nix` + `hosts/perry-eb-hardware.nix` to the new name.
 2. Add `nixosConfigurations.<name> = mkHost "<name>";` in `flake.nix`.
 3. Generate hardware on the machine, deploy, commit.
