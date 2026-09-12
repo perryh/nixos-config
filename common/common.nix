@@ -58,7 +58,8 @@ in
     users.users.perryh = {
       isNormalUser = true;
       description = "Perry Huang";
-      extraGroups = [ "networkmanager" "wheel" ];
+      extraGroups = [ "networkmanager" "wheel" ]
+        ++ lib.optionals (lib.elem "containers" config.perry.systemGroups) [ "docker" ];
       packages = with pkgs; [
         kdePackages.kate
       ];
@@ -82,6 +83,9 @@ in
     # --- networking ---
     networking.networkmanager.enable = true;
     services.tailscale.enable = true;
+
+    # --- docker (only when the "containers" group is enabled) ---
+    virtualisation.docker.enable = lib.elem "containers" config.perry.systemGroups;
 
     # --- shared services ---
     services.openssh.enable = true;
