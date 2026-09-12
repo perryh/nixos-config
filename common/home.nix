@@ -20,8 +20,12 @@
 
   programs.git = {
     enable = true;
+    # home-manager manages ~/.config/git/config (a symlink into the store),
+    # so `git config --global` can't write it — declare identity here instead.
+    # Shared, so every machine commits with the same identity.
     settings = {
-      user.name = "perryh";
+      user.name = "Perry Huang";
+      user.email = "perry.huang@gmail.com";
       init.defaultBranch = "main";
     };
   };
