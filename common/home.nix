@@ -20,8 +20,8 @@
 
   programs.git = {
     enable = true;
-    userName = "perryh";
-    extraConfig = {
+    settings = {
+      user.name = "perryh";
       init.defaultBranch = "main";
     };
   };
