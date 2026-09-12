@@ -3,7 +3,7 @@
   networking.hostName = "nixos";
 
   # --- laptop-only stuff ---
-  services.bluetooth.enable = true;
+  hardware.bluetooth.enable = true;
   powerManagement.cpuFreqGovernor = "powersave";
   services.upower.enable = true;
 
