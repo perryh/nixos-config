@@ -1,6 +1,6 @@
-# nixos (laptop) — per-host: hostname, power, display, bluetooth, etc.
+# perry-eb (laptop) — per-host: hostname, power, display, bluetooth, etc.
 { ... }: {
-  networking.hostName = "nixos";
+  networking.hostName = "perry-eb";
 
   # --- boot loader: systemd-boot (matches the installer's UEFI setup) ---
   boot.loader.systemd-boot.enable = true;
