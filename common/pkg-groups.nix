@@ -8,8 +8,11 @@
   dev = with pkgs; [
     git
   ];
+  # (dockerTools is a helper attrset — pullImage/buildImage functions — not a
+  # package; the client itself is just `docker`. Use dockerTools.pullImage or
+  # dockerTools.buildImage for image tasks.)
   containers = with pkgs; [
-    dockerTools
+    docker
   ];
 
   # --- desktop-only — omit on headless hosts ---
