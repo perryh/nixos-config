@@ -12,7 +12,7 @@
 
   programs.zsh = {
     enable = true;
-    shellOptions = [ "histignoredups" ];
+    setOptions = [ "histignoredups" ];
     initExtra = ''
       export EDITOR=nvim
     '';
