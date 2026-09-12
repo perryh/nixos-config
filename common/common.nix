@@ -4,12 +4,12 @@
   time.timeZone = "America/Los_Angeles";
 
   # --- shared user account ---
-  # Note: if a user doesn't exist on a host yet, initialHash = "" fails the
-  # rebuild ("has no password hash") — set it from
-  # `getent shadow perryh | cut -d: -f2` in that case.
+  # perryh already exists on each host with a real password; with
+  # users.mutableUsers (default) existing passwords are left untouched, so no
+  # password option is needed here. For a brand-new user on a host, set
+  # hashedPassword (or initialHashedPassword) instead.
   users.users.perryh = {
     isNormalUser = true;
-    initialHash = "";
   };
 
   # --- shared system packages (identical versions on every host) ---
