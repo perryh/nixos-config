@@ -70,7 +70,6 @@ in
 
     # --- shared system packages (identical versions on every host) ---
     # Base set is always present; named groups are selected by perry.systemGroups.
-    # (git comes from gitAndTools in the "dev" group — no bare `git` needed.)
     environment.systemPackages =
       with pkgs; [
         gh

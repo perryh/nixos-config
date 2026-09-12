@@ -3,9 +3,10 @@
 # common/common.nix). Headless servers: set perry.systemGroups = [ "dev" "containers" ];
 { pkgs }: {
   # --- safe on ANY host, including headless servers ---
-  # gitAndTools = git + a curated bundle of git-adjacent tooling
+  # (gitAndTools was removed in nixos-26.05 — its members now live at the
+  # top level, so individual tools are added here as wanted.)
   dev = with pkgs; [
-    gitAndTools
+    git
   ];
   containers = with pkgs; [
     dockerTools
