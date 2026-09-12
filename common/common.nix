@@ -1,6 +1,7 @@
 # Shared across ALL hosts — anything that should be identical on every machine.
 { pkgs, ... }: {
 
+  system.stateVersion = "26.05";
   time.timeZone = "America/Los_Angeles";
 
   # --- shared user account ---

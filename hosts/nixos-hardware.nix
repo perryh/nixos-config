@@ -1,9 +1,11 @@
 # Hardware config for nixos (laptop).
-# DO NOT hand-edit — regenerate on this machine with:
+#
+# DO NOT hand-edit. On THIS machine:
 #   sudo nixos-generate-config
-# then copy the generated /etc/nixos/hardware-configuration.nix here
-# (replacing this placeholder). This file is the boot/filesystem/disk
-# junk — keep it out of the shared modules so other hosts don't import it.
+#   sudo cp /etc/nixos/hardware-configuration.nix ~/git/nix-config/hosts/nixos-hardware.nix
+# Then commit. This file carries the real disk layout (fileSystems, boot
+# parameters, file systems) that boot.loader.grub.devices needs to install.
+# Keep it out of the shared modules so other hosts don't import it.
 { ... }: {
-  # placeholder — replace with nixos-generate-config output
+  # placeholder — replace with the real generated file
 }
