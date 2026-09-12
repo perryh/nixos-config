@@ -7,6 +7,7 @@
   # top level, so individual tools are added here as wanted.)
   dev = with pkgs; [
     git
+    herdr  # terminal multiplexer for AI coding agents (repo-local overlay)
   ];
   # (dockerTools is a helper attrset — pullImage/buildImage functions — not a
   # package; the client itself is just `docker`. Use dockerTools.pullImage or

@@ -47,6 +47,11 @@ in
     # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
 
+    # Extend pkgs with repo-local derivations (e.g. herdr, not in nixpkgs).
+    nixpkgs.overlays = [
+      (import ../pkgs/herdr.nix)
+    ];
+
     # Latest kernel
     boot.kernelPackages = pkgs.linuxPackages_latest;
 
