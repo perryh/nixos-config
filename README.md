@@ -46,6 +46,7 @@ Groups:
 | `graphics`   | gimp, darktable, imagemagick                        |
 | `media`      | ffmpeg, mpv, vlc                                    |
 | `office`     | libreoffice                                         |
+| `terminals`  | ghostty                                             |
 
 Selecting `containers` also enables the `docker` daemon and adds the user to
 the `docker` group; selecting `browsers` also enables the `firefox` module.

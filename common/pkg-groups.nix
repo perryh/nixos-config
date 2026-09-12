@@ -35,4 +35,7 @@
   office = with pkgs; [
     libreoffice
   ];
+  terminals = with pkgs; [
+    ghostty  # GPU-accelerated terminal (needs a desktop session)
+  ];
 }
