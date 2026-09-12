@@ -1,6 +1,6 @@
 # Shared user/home config (home-manager) — identical on every host.
 # Host-specific user tweaks belong in hosts/<name>.nix under
-# home-manager.users.perry = { ... }.
+# home-manager.users.perryh = { ... }.
 { pkgs, ... }: {
   home.stateVersion = "25.11";
 
@@ -20,7 +20,7 @@
 
   programs.git = {
     enable = true;
-    userName = "perry";
+    userName = "perryh";
     extraConfig = {
       init.defaultBranch = "main";
     };

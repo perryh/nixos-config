@@ -17,12 +17,13 @@ machine; per-host files hold hostname + hardware specifics.
 
 ## First boot on a machine
 
-1. `echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf`
-2. Clone this repo to `~/nix-config`
-3. `sudo nixos-generate-config` → move `/etc/nixos/hardware-configuration.nix`
+1. Clone this repo to `~/nix-config` (flakes are enabled by default since 24.11)
+2. `sudo nixos-generate-config` → move `/etc/nixos/hardware-configuration.nix`
    into the repo as `hosts/<name>-hardware.nix`
-4. `sudo passwd perry` (before the first flake build)
-5. `sudo nixos-rebuild switch --flake ~/nix-config#<name>`
+3. Capture the existing password hash before the first flake build
+   (`getent shadow <user> | cut -d: -f2`) and set it as `initialHash` in
+   `common/common.nix`, otherwise the rebuild fails
+4. `sudo nixos-rebuild switch --flake ~/nix-config#<name>`
 
 First build compiles the whole closure — takes a while. After that,
 `/etc/nixos/configuration.nix` becomes a symlink into the repo; the repo is
@@ -30,6 +31,6 @@ the single source of truth.
 
 ## Adding a new host
 
-1. Copy `hosts/laptop.nix` + `hosts/laptop-hardware.nix` to the new name.
+1. Copy `hosts/nixos.nix` + `hosts/nixos-hardware.nix` to the new name.
 2. Add `nixosConfigurations.<name> = mkHost "<name>";` in `flake.nix`.
 3. Generate hardware on the machine, deploy, commit.

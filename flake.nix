@@ -23,7 +23,7 @@
         ];
       };
   in {
-    nixosConfigurations.laptop = mkHost "laptop";
+    nixosConfigurations.nixos = mkHost "nixos";
     # add more hosts here as you bring machines online:
     # nixosConfigurations.desktop = mkHost "desktop";
   };
