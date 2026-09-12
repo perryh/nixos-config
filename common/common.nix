@@ -4,12 +4,11 @@
   time.timeZone = "America/Los_Angeles";
 
   # --- shared user account ---
+  # Note: if a user doesn't exist on a host yet, initialHash = "" fails the
+  # rebuild ("has no password hash") — set it from
+  # `getent shadow perryh | cut -d: -f2` in that case.
   users.users.perryh = {
     isNormalUser = true;
-    # First switch on a host with an existing password:
-  #   H=$(getent shadow perryh | cut -d: -f2)
-    # then set initialHash = "$H"; below (private repo only!), or the
-    # rebuild fails with "The user 'perryh' has no password hash".
     initialHash = "";
   };
 
