@@ -10,7 +10,11 @@
 let
   groups = import ./pkg-groups.nix { inherit pkgs; };
   enabledGroups = map (g:
-    groups.${g} or (throw "perry.systemGroups: unknown group '${g}' (valid: ${lib.concatStringsSep ", " (lib.attrNames groups))})"
+    groups.${g} or (throw (
+      "perry.systemGroups: unknown group '${g}' (valid: "
+      + lib.concatStringsSep ", " (lib.attrNames groups)
+      + ")"
+    ))
   ) config.perry.systemGroups;
 in
 {
