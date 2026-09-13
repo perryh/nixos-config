@@ -1,7 +1,16 @@
 # Named package groups shared across all hosts.
 # A host enables/disables whole groups via `perry.systemGroups` (see
-# common/common.nix). Headless servers: set perry.systemGroups = [ "dev" "containers" ];
+# common/common.nix). Headless servers: set perry.systemGroups =
+# [ "core" "dev" "containers" ];
 { pkgs }: {
+  # Base set, safe on ANY host. Every host needs these — they are part of
+  # the "all groups" default, so desktops pick them up automatically.
+  core = with pkgs; [
+    gh
+    neovim
+    curl
+    jq
+  ];
   # --- safe on ANY host, including headless servers ---
   # (gitAndTools was removed in nixos-26.05 — its members now live at the
   # top level, so individual tools are added here as wanted.)

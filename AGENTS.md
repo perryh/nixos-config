@@ -11,10 +11,12 @@ No CI, no test suite, no linter — nix eval/parse is the check.
   (follows the nixpkgs input); `mkHost "<name>"` wires common + host + hardware.
 - `common/common.nix` — shared users, services, desktop stack, home-manager,
   and the `perry.systemGroups` option.
-- `common/pkg-groups.nix` — named groups: `dev`, `containers`, `browsers`,
-  `graphics`, `media`, `office`, `terminals`, `chat`. Hosts can take whole
-  groups from `nixpkgs-unstable` via `perry.unstableGroups` (default `[]`);
-  the group is then installed only from unstable.
+- `common/pkg-groups.nix` — named groups: `core` (gh/neovim/curl/jq), `dev`,
+  `containers`, `browsers`, `graphics`, `media`, `office`, `terminals`,
+  `chat`. `environment.systemPackages` is built entirely from groups — never
+  list bare packages there. Hosts can take whole groups from
+  `nixpkgs-unstable` via `perry.unstableGroups` (default `[]`); the group is
+  then installed only from unstable.
 - `common/home.nix` — shared home-manager user config (git identity lives here).
 - `pkgs/<name>.nix` — repo-local overlays for packages not in nixpkgs (herdr).
 - `hosts/<name>.nix` — per-host: hostname, loader, laptop/desktop specifics.
@@ -31,11 +33,12 @@ No CI, no test suite, no linter — nix eval/parse is the check.
   `cp /etc/nixos/hardware-configuration.nix hosts/<name>-hardware.nix`
 
 ## Conventions
-- Shared packages go into a group in `common/pkg-groups.nix`, never directly
-  into `environment.systemPackages` (base set there is gh/neovim/curl/jq).
-  Side effects tie to groups: `containers` → docker daemon + docker group;
-  `browsers` → firefox module.
-- Headless hosts set `perry.systemGroups = [ "dev" "containers" ]` (default = all).
+- Shared packages go into a group in `common/pkg-groups.nix` —
+  `environment.systemPackages` holds only the group expansion (no bare
+  packages). Side effects tie to groups: `containers` → docker daemon +
+  docker group; `browsers` → firefox module.
+- Headless hosts set `perry.systemGroups = [ "core" "dev" "containers" ]`
+  (default = all groups; `core` = gh/neovim/curl/jq).
 - New host: copy `hosts/perry-eb*.nix` to the new name, add
   `nixosConfigurations."<name>" = mkHost "<name>";` (name quoted) in flake.nix.
 - Any module defining top-level `options` (like common.nix) must put every

@@ -33,16 +33,17 @@ machine to machine; per-host files hold hostname + hardware specifics.
 so a desktop needs no assignment):
 
 ```nix
-# desktop — all groups (the default; nothing to set)
+# desktop — all groups including core (the default; nothing to set)
 
-# headless server — no GUI
-perry.systemGroups = [ "dev" "containers" ];
+# headless server — no GUI, keep the base tools
+perry.systemGroups = [ "core" "dev" "containers" ];
 ```
 
 Groups:
 
 | group        | packages                                            |
 |--------------|-----------------------------------------------------|
+| `core`       | gh, neovim, curl, jq                                |
 | `dev`        | git, herdr                                          |
 | `containers` | docker                                              |
 | `browsers`   | firefox, brave, google-chrome                       |

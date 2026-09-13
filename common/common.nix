@@ -4,7 +4,7 @@
 #
 # Package groups: pick per-host which named groups (common/pkg-groups.nix) to
 # install via perry.systemGroups. Default = all groups (desktop). A headless
-# server would set:  perry.systemGroups = [ "dev" "containers" ];
+# server would set:  perry.systemGroups = [ "core" "dev" "containers" ];
 { config, pkgs, lib, unstablePkgs, ... }:
 
 let
@@ -34,8 +34,8 @@ in
   options.perry.systemGroups = lib.mkOption {
     type = lib.types.listOf lib.types.str;
     default = lib.attrNames groups;
-    example = [ "dev" "containers" ];
-    description = "Which named package groups (common/pkg-groups.nix) to install. Headless hosts drop the GUI groups.";
+    example = [ "core" "dev" "containers" ];
+    description = "Which named package groups (common/pkg-groups.nix) to install. Headless hosts drop the GUI groups but keep core.";
   };
 
   options.perry.unstableGroups = lib.mkOption {
@@ -99,15 +99,10 @@ in
     };
 
     # --- shared system packages (identical versions on every host) ---
-    # Base set is always present; named groups are selected by perry.systemGroups.
+    # Everything is a named group (pkg-groups.nix); selected by
+    # perry.systemGroups (+ perry.unstableGroups for rolling versions).
     environment.systemPackages =
-      with pkgs; [
-        gh
-        neovim
-        curl
-        jq
-      ]
-      ++ builtins.concatLists enabledGroups
+      builtins.concatLists enabledGroups
       ++ builtins.concatLists unstableGroupPkgs;
 
     # --- networking ---
