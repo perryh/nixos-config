@@ -9,8 +9,11 @@ machine to machine; per-host files hold hostname + hardware specifics.
 - `flake.nix` — pins `nixpkgs` (release branch) + home-manager; `flake.lock`
   is the version pin. Upgrade on purpose:
   `nix flake lock --update-input nixpkgs`, rebuild all hosts, commit.
+  Also pins `nixpkgs-unstable` (rolling) for groups listed in
+  `perry.unstableGroups`; refresh with `nix flake update nixpkgs-unstable`.
 - `common/common.nix` — shared users, services, networking, home-manager
-  wiring, and the `perry.systemGroups` selector.
+  wiring, the `perry.systemGroups` selector, and the `perry.unstableGroups`
+  selector (same group names served from the rolling unstable branch).
 - `common/pkg-groups.nix` — named package groups (`dev`, `containers`,
   `browsers`, `graphics`, `media`, `office`). A host picks its set with
   `perry.systemGroups`; default is all of them. Headless servers drop the GUI
@@ -50,6 +53,21 @@ Groups:
 
 Selecting `containers` also enables the `docker` daemon and adds the user to
 the `docker` group; selecting `browsers` also enables the `firefox` module.
+
+## Unstable groups
+
+A host can take whole groups from the rolling `nixpkgs-unstable` branch
+instead of the stable pin, while the OS and everything else stay on the
+release branch:
+
+```nix
+# hosts/<name>.nix
+perry.unstableGroups = [ "browsers" "terminals" "chat" ];
+```
+
+The group is then installed exactly once, from unstable (its stable copy is
+dropped). Refresh those apps with `nix flake update nixpkgs-unstable` +
+rebuild; remove a group from the list to return it to the stable pin.
 
 ## First boot on a machine
 

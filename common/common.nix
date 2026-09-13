@@ -5,19 +5,30 @@
 # Package groups: pick per-host which named groups (common/pkg-groups.nix) to
 # install via perry.systemGroups. Default = all groups (desktop). A headless
 # server would set:  perry.systemGroups = [ "dev" "containers" ];
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, unstablePkgs, ... }:
 
 let
   groups = import ./pkg-groups.nix { inherit pkgs; };
+  # Same group definitions, built from the rolling nixpkgs-unstable set.
+  unstableGroupsSet = import ./pkg-groups.nix { pkgs = unstablePkgs; };
+  validGroups = lib.concatStringsSep ", " (lib.attrNames groups);
   # `config` here is the final merged config, so host overrides to
-  # perry.systemGroups (and its default) are visible.
+  # perry.systemGroups (and its default) are visible. Groups listed in
+  # perry.unstableGroups are dropped from the stable set and taken from
+  # unstable instead (never installed from both).
   enabledGroups = map (g:
     groups.${g} or (throw (
-      "perry.systemGroups: unknown group '${g}' (valid: "
-      + lib.concatStringsSep ", " (lib.attrNames groups)
-      + ")"
+      "perry.systemGroups: unknown group '${g}' (valid: " + validGroups + ")"
     ))
-  ) config.perry.systemGroups;
+  ) (lib.subtractLists config.perry.unstableGroups config.perry.systemGroups);
+  unstableGroupPkgs = map (g:
+    unstableGroupsSet.${g} or (throw (
+      "perry.unstableGroups: unknown group '${g}' (valid: " + validGroups + ")"
+    ))
+  ) config.perry.unstableGroups;
+  # Group side effects fire if the group is enabled from either source.
+  anyEnabledGroups = lib.unique
+    (config.perry.systemGroups ++ config.perry.unstableGroups);
 in
 {
   options.perry.systemGroups = lib.mkOption {
@@ -25,6 +36,19 @@ in
     default = lib.attrNames groups;
     example = [ "dev" "containers" ];
     description = "Which named package groups (common/pkg-groups.nix) to install. Headless hosts drop the GUI groups.";
+  };
+
+  options.perry.unstableGroups = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    example = [ "browsers" "terminals" ];
+    description = ''
+      Package groups (same names as pkg-groups.nix) to install from the
+      rolling nixpkgs-unstable branch instead of the stable pin. Members of
+      these groups are removed from perry.systemGroups' stable set, so each
+      group is installed exactly once. Requires the group also be in
+      perry.systemGroups (or the default all-groups) for side effects.
+    '';
   };
 
   config = {
@@ -64,7 +88,7 @@ in
       isNormalUser = true;
       description = "Perry Huang";
       extraGroups = [ "networkmanager" "wheel" ]
-        ++ lib.optionals (lib.elem "containers" config.perry.systemGroups) [ "docker" ];
+        ++ lib.optionals (lib.elem "containers" anyEnabledGroups) [ "docker" ];
       packages = with pkgs; [
         kdePackages.kate
       ];
@@ -83,14 +107,15 @@ in
         curl
         jq
       ]
-      ++ builtins.concatLists enabledGroups;
+      ++ builtins.concatLists enabledGroups
+      ++ builtins.concatLists unstableGroupPkgs;
 
     # --- networking ---
     networking.networkmanager.enable = true;
     services.tailscale.enable = true;
 
-    # --- docker (only when the "containers" group is enabled) ---
-    virtualisation.docker.enable = lib.elem "containers" config.perry.systemGroups;
+    # --- docker (when the "containers" group is on, from either source) ---
+    virtualisation.docker.enable = lib.elem "containers" anyEnabledGroups;
 
     # --- shared services ---
     services.openssh.enable = true;
@@ -118,9 +143,14 @@ in
     };
 
     # --- browsers ---
-    # Tied to the "browsers" group so headless hosts (which drop GUI groups)
-    # don't still get a browser.
-    programs.firefox.enable = lib.elem "browsers" config.perry.systemGroups;
+    # Tied to the "browsers" group (either source) so headless hosts, which
+    # drop GUI groups, don't still get a browser.
+    programs.firefox.enable = lib.elem "browsers" anyEnabledGroups;
+    # The firefox module (default-browser registration, wrapper) must use the
+    # same build as the group: unstable when the group is unstable-tracked.
+    programs.firefox.package =
+      if lib.elem "browsers" config.perry.unstableGroups
+      then unstablePkgs.firefox else pkgs.firefox;
 
     # --- shared user/home config via home-manager ---
     home-manager.useGlobalPkgs = true;

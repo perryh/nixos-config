@@ -12,7 +12,9 @@ No CI, no test suite, no linter — nix eval/parse is the check.
 - `common/common.nix` — shared users, services, desktop stack, home-manager,
   and the `perry.systemGroups` option.
 - `common/pkg-groups.nix` — named groups: `dev`, `containers`, `browsers`,
-  `graphics`, `media`, `office`, `terminals`, `chat`.
+  `graphics`, `media`, `office`, `terminals`, `chat`. Hosts can take whole
+  groups from `nixpkgs-unstable` via `perry.unstableGroups` (default `[]`);
+  the group is then installed only from unstable.
 - `common/home.nix` — shared home-manager user config (git identity lives here).
 - `pkgs/<name>.nix` — repo-local overlays for packages not in nixpkgs (herdr).
 - `hosts/<name>.nix` — per-host: hostname, loader, laptop/desktop specifics.
@@ -21,7 +23,8 @@ No CI, no test suite, no linter — nix eval/parse is the check.
 ## Commands (verified)
 - Deploy on the host: `sudo nixos-rebuild switch --flake ~/git/nixos-config#perry-eb`
 - Upgrade nixpkgs: `nix flake lock --update-input nixpkgs`, then rebuild all
-  hosts and commit `flake.lock` (the lock file is the version pin).
+  hosts and commit `flake.lock` (the lock file is the version pin). Refresh
+  unstable-tracked groups: `nix flake update nixpkgs-unstable`.
 - Syntax gate: `nix-instantiate --parse <file.nix>`
 - Eval check: `nix eval .#nixosConfigurations.perry-eb.pkgs.<app>.version`
 - Hardware changed: `sudo nixos-generate-config`, then

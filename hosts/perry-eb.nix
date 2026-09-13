@@ -2,6 +2,10 @@
 { ... }: {
   networking.hostName = "perry-eb";
 
+  # Desktop GUI apps track nixpkgs-unstable for the latest versions; the OS
+  # and everything else stay on the stable 26.05 pin.
+  perry.unstableGroups = [ "browsers" "terminals" "chat" ];
+
   # --- boot loader: systemd-boot (matches the installer's UEFI setup) ---
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
