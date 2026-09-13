@@ -41,5 +41,6 @@
   chat = with pkgs; [
     vesktop  # Discord desktop client (Vencord preinstalled)
     signal-desktop
+    slack
   ];
 }
