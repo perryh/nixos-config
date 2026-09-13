@@ -22,7 +22,8 @@
         modules = [
           ./common/common.nix
           # apps that track nixpkgs-unstable (see common/unstable-apps.nix)
-          (import ./common/unstable-apps.nix nixpkgs-unstable)
+          (import ./common/unstable-apps.nix
+            nixpkgs-unstable.legacyPackages."x86_64-linux")
           home-manager.nixosModules.home-manager
           ./hosts/${name}.nix
           ./hosts/${name}-hardware.nix
