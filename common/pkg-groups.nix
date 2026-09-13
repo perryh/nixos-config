@@ -39,7 +39,7 @@
     ghostty  # GPU-accelerated terminal (needs a desktop session)
   ];
   chat = with pkgs; [
-    vesktop  # desktop wrapper for web apps: WhatsApp, Discord, Teams, ...
+    vesktop  # Discord desktop client (Vencord preinstalled)
     signal-desktop
   ];
 }
