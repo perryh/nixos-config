@@ -13,12 +13,13 @@ No CI, no test suite, no linter — nix eval/parse is the check.
   and the `perry.systemGroups` option.
 - `common/pkg-groups.nix` — named groups: `core` (gh/neovim/curl/jq), `dev`,
   `containers`, `browsers`, `graphics`, `media`, `office`, `terminals`,
-  `chat`. `environment.systemPackages` is built entirely from groups — never
-  list bare packages there. Hosts can take whole groups from
-  `nixpkgs-unstable` via `perry.unstableGroups` (default `[]`); the group is
-  then installed only from unstable.
+  `chat`, `ai` (herdr; unstable-only). `environment.systemPackages` is built
+  entirely from groups — never list bare packages there. Hosts can take whole
+  groups from `nixpkgs-unstable` via `perry.unstableGroups` (default `[]`);
+  the group is then installed only from unstable.
 - `common/home.nix` — shared home-manager user config (git identity lives here).
-- `pkgs/<name>.nix` — repo-local overlays for packages not in nixpkgs (herdr).
+- `pkgs/` — reserved for repo-local overlays of packages not in nixpkgs
+  (currently empty; herdr is now upstream in nixpkgs).
 - `hosts/<name>.nix` — per-host: hostname, loader, laptop/desktop specifics.
 - `hosts/<name>-hardware.nix` — generated disk/luks layout; never hand-edit.
 
@@ -37,6 +38,12 @@ No CI, no test suite, no linter — nix eval/parse is the check.
   `environment.systemPackages` holds only the group expansion (no bare
   packages). Side effects tie to groups: `containers` → docker daemon +
   docker group; `browsers` → firefox module.
+- `perry.unstableGroups` (same group names) takes groups from the rolling
+  `nixpkgs-unstable` input (pinned in `flake.lock`); they're removed from the
+  stable set and installed exactly once. `ai` (herdr) exists ONLY in
+  unstable — hosts on the all-groups default must list it in
+  `perry.unstableGroups` (perry-eb does); selecting it from the stable set
+  throws a clear error.
 - Headless hosts set `perry.systemGroups = [ "core" "dev" "containers" ]`
   (default = all groups; `core` = gh/neovim/curl/jq).
 - New host: copy `hosts/perry-eb*.nix` to the new name, add
