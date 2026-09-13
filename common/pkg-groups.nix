@@ -38,4 +38,8 @@
   terminals = with pkgs; [
     ghostty  # GPU-accelerated terminal (needs a desktop session)
   ];
+  chat = with pkgs; [
+    vesktop  # Electron wrapper for Signal/WhatsApp/Teams (needs a desktop session)
+    signal-desktop
+  ];
 }
