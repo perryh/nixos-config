@@ -22,12 +22,10 @@
         system = "x86_64-linux";
         specialArgs = {
           # Package set for perry.unstableGroups: rolling branch, unfree
-          # allowed (browsers/chat have unfree apps), plus the repo-local
-          # overlays so groups like dev (herdr) resolve here too.
+          # allowed (browsers/chat have unfree apps).
           unstablePkgs = import nixpkgs-unstable {
             system = "x86_64-linux";
             config.allowUnfree = true;
-            overlays = [ (import ./pkgs/herdr.nix) ];
           };
         };
         modules = [

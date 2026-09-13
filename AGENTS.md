@@ -44,8 +44,9 @@ No CI, no test suite, no linter — nix eval/parse is the check.
 - Any module defining top-level `options` (like common.nix) must put every
   config attr under an explicit `config = { ... }`.
 - Prebuilt binary in `pkgs/`: `final.runCommand` + `fetchurl`; the SRI hash is
-  base64 of the raw sha256 bytes (see `pkgs/herdr.nix`). Never mkDerivation
-  for a bare executable.
+  base64 of the raw sha256 bytes. Never mkDerivation for a bare executable.
+  (No such packages currently — herdr was upstreamed to nixpkgs; its
+  repo-local overlay was removed in favor of the `ai` group.)
 - Commits: imperative, short, optional `scope:` prefix
   (e.g. `chat: add slack`, `herdr: use runCommand`). Git identity comes from
   home-manager's git config — don't pass `-c user.name/-c user.email`.

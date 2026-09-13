@@ -16,7 +16,14 @@
   # top level, so individual tools are added here as wanted.)
   dev = with pkgs; [
     git
-    herdr  # terminal multiplexer for AI coding agents (repo-local overlay)
+  ];
+  # herdr (AI coding-agent multiplexer) is only in nixpkgs-unstable, not the
+  # stable 26.05 pin — track it via perry.unstableGroups = [ "ai" ].
+  # Selecting this group from the stable set errors on purpose.
+  ai = [
+    (pkgs.herdr or (throw (
+      "herdr is only in nixpkgs-unstable — add \"ai\" to perry.unstableGroups"
+    )))
   ];
   # (dockerTools is a helper attrset — pullImage/buildImage functions — not a
   # package; the client itself is just `docker`. Use dockerTools.pullImage or

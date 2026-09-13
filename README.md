@@ -14,14 +14,18 @@ machine to machine; per-host files hold hostname + hardware specifics.
 - `common/common.nix` — shared users, services, networking, home-manager
   wiring, the `perry.systemGroups` selector, and the `perry.unstableGroups`
   selector (same group names served from the rolling unstable branch).
-- `common/pkg-groups.nix` — named package groups (`dev`, `containers`,
-  `browsers`, `graphics`, `media`, `office`). A host picks its set with
-  `perry.systemGroups`; default is all of them. Headless servers drop the GUI
-  groups (see below).
+- `common/pkg-groups.nix` — named package groups (`core`, `dev`, `containers`,
+  `browsers`, `graphics`, `media`, `office`, `terminals`, `chat`, `ai`). A
+  host picks its set with `perry.systemGroups`; default is all of them.
+  Headless servers drop the GUI groups (see below). `ai` (herdr) is
+  nixpkgs-unstable-only — it must be in `perry.unstableGroups`, not the
+  stable set.
 - `common/home.nix` — shared user config via home-manager (zsh, git identity,
   ripgrep/fzf/eza).
-- `pkgs/` — repo-local derivations for packages not in nixpkgs (currently
-  `herdr`), applied via `nixpkgs.overlays` in `common/common.nix`.
+- `pkgs/` — reserved for repo-local derivations of packages not in nixpkgs
+  (currently empty; herdr is now upstream). Pattern when one is needed: an
+  overlay in `pkgs/<name>.nix` added to `nixpkgs.overlays` in
+  `common/common.nix`, referenced by name in a group.
 - `hosts/<name>.nix` — per-host: hostname, boot loader, laptop/desktop
   specifics, and `perry.systemGroups` for that machine.
 - `hosts/<name>-hardware.nix` — per-host boot/filesystem/disk. Regenerate with
@@ -44,13 +48,15 @@ Groups:
 | group        | packages                                            |
 |--------------|-----------------------------------------------------|
 | `core`       | gh, neovim, curl, jq                                |
-| `dev`        | git, herdr                                          |
+| `dev`        | git                                                 |
 | `containers` | docker                                              |
 | `browsers`   | firefox, brave, google-chrome                       |
 | `graphics`   | gimp, darktable, imagemagick                        |
 | `media`      | ffmpeg, mpv, vlc                                    |
 | `office`     | libreoffice                                         |
 | `terminals`  | ghostty                                             |
+| `chat`       | vesktop, signal-desktop, slack                      |
+| `ai`         | herdr (unstable-only — see below)                   |
 
 Selecting `containers` also enables the `docker` daemon and adds the user to
 the `docker` group; selecting `browsers` also enables the `firefox` module.
@@ -63,12 +69,14 @@ release branch:
 
 ```nix
 # hosts/<name>.nix
-perry.unstableGroups = [ "browsers" "terminals" "chat" ];
+perry.unstableGroups = [ "browsers" "terminals" "chat" "ai" ];
 ```
 
 The group is then installed exactly once, from unstable (its stable copy is
 dropped). Refresh those apps with `nix flake update nixpkgs-unstable` +
 rebuild; remove a group from the list to return it to the stable pin.
+Note the `ai` group (herdr) exists only in unstable — hosts that don't list
+it in `perry.unstableGroups` get a clear error if the stable set includes it.
 
 ## First boot on a machine
 
@@ -92,9 +100,12 @@ single source of truth.
 2. Add `nixosConfigurations.<name> = mkHost "<name>";` in `flake.nix`.
 3. Generate hardware on the machine, deploy, commit.
 
-## Updating a package not in nixpkgs
+## Packages not in nixpkgs
 
-Repo-local derivations live in `pkgs/`. Each is an overlay added in
-`common/common.nix` (`nixpkgs.overlays`) and then referenced by name in a
-package group. See `pkgs/herdr.nix` for the pattern — bump the version, url,
-and hash, then rebuild.
+When a package isn't in nixpkgs at all, add a repo-local derivation under
+`pkgs/<name>.nix` as an overlay (wired into `nixpkgs.overlays` in
+`common/common.nix`, referenced by name in a group). Prebuilt release
+binaries: `final.runCommand` + `fetchurl` (SRI hash = base64 of the raw
+sha256 bytes) — never `mkDerivation` for a bare executable. (Currently no
+such packages: herdr was upstreamed into nixpkgs and the repo-local overlay
+was removed.)
