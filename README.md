@@ -56,7 +56,7 @@ Groups:
 | `office`     | libreoffice                                         |
 | `terminals`  | ghostty                                             |
 | `chat`       | vesktop, signal-desktop, slack                      |
-| `ai`         | herdr (unstable-only — see below)                   |
+| `ai`         | herdr, opencode (see below)                         |
 
 Selecting `containers` also enables the `docker` daemon and adds the user to
 the `docker` group; selecting `browsers` also enables the `firefox` module.

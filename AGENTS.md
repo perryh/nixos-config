@@ -13,7 +13,7 @@ No CI, no test suite, no linter — nix eval/parse is the check.
   and the `perry.systemGroups` option.
 - `common/pkg-groups.nix` — named groups: `core` (gh/neovim/curl/jq), `dev`,
   `containers`, `browsers`, `graphics`, `media`, `office`, `terminals`,
-  `chat`, `ai` (herdr; unstable-only). `environment.systemPackages` is built
+  `chat`, `ai` (herdr, opencode; herdr unstable-only). `environment.systemPackages` is built
   entirely from groups — never list bare packages there. Hosts can take whole
   groups from `nixpkgs-unstable` via `perry.unstableGroups` (default `[]`);
   the group is then installed only from unstable.

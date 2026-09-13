@@ -24,6 +24,7 @@
     (pkgs.herdr or (throw (
       "herdr is only in nixpkgs-unstable — add \"ai\" to perry.unstableGroups"
     )))
+    pkgs.opencode
   ];
   # (dockerTools is a helper attrset — pullImage/buildImage functions — not a
   # package; the client itself is just `docker`. Use dockerTools.pullImage or
