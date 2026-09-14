@@ -13,6 +13,11 @@
   programs.zsh = {
     enable = true;
     setOptions = [ "histignoredups" ];
+    oh-my-zsh = {
+      enable = true;
+      theme = "robbyrussell";
+      plugins = [ "git" "sudo" "z" "extract" ];
+    };
     initContent = ''
       export EDITOR=nvim
     '';
