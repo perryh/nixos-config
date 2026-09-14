@@ -8,6 +8,7 @@
   core = with pkgs; [
     gh
     neovim
+    vim
     curl
     jq
   ];
