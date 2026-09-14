@@ -82,6 +82,10 @@ in
     users.users.perryh = {
       isNormalUser = true;
       description = "Perry Huang";
+      # Login shell: zsh (oh-my-zsh is configured per-user in common/home.nix).
+      # NixOS defaults everyone to bash (users.defaultUserShell), so without
+      # this terminals would run bash and never source ~/.zshrc.
+      shell = pkgs.zsh;
       extraGroups = [ "networkmanager" "wheel" ]
         ++ lib.optionals (lib.elem "containers" anyEnabledGroups) [ "docker" ];
       packages = with pkgs; [
@@ -110,6 +114,12 @@ in
     # --- shared services ---
     services.openssh.enable = true;
     services.printing.enable = true;
+
+    # zsh is perryh's login shell (users.users.perryh.shell); the NixOS
+    # programs.zsh module provides /etc/zshenv|zprofile|zshrc and registers
+    # zsh in environment.shells. The users module asserts programs.zsh.enable
+    # whenever a user's shell is pkgs.zsh.
+    programs.zsh.enable = true;
 
     # Sound with pipewire
     services.pulseaudio.enable = false;
