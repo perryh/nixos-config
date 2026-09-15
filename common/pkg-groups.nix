@@ -18,6 +18,18 @@
   dev = with pkgs; [
     git
   ];
+  # Common network/diagnostic tools — safe on any host.
+  # (26.05 removed `networkutils` and `bindutils`: ifconfig/netstat/route
+  # live in `net-tools`, dig/nslookup are the `bind.dnsutils` output.)
+  net = with pkgs; [
+    whois
+    net-tools
+    iputils
+    bind.dnsutils
+    mtr
+    netcat
+    nmap
+  ];
   # herdr (AI coding-agent multiplexer) is only in nixpkgs-unstable, not the
   # stable 26.05 pin — track it via perry.unstableGroups = [ "ai" ].
   # Selecting this group from the stable set errors on purpose.
