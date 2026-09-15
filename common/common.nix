@@ -71,6 +71,9 @@ in
     # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
 
+    # Enable nix-command + flakes declaratively (managed /etc/nix/nix.conf)
+    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
     # Latest kernel
     boot.kernelPackages = pkgs.linuxPackages_latest;
 
