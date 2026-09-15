@@ -30,6 +30,17 @@
     netcat
     nmap
   ];
+  # Language toolchains. Safe on any host, but best tracked via
+  # perry.unstableGroups: the stable 26.05 pin lags (python3 3.13, rust 1.95)
+  # while the unstable pin follows upstream.
+  langs = with pkgs; [
+    go_latest  # latest Go release (plain `go` lags one release behind)
+    python3
+    ruby
+    rustc  # (top-level `rust` is the platform attrset, not a package)
+    cargo
+    nodejs_24  # latest Node LTS (nodejs_26 is current non-LTS until ~Oct 2026)
+  ];
   # herdr (AI coding-agent multiplexer) is only in nixpkgs-unstable, not the
   # stable 26.05 pin — track it via perry.unstableGroups = [ "ai" ].
   # Selecting this group from the stable set errors on purpose.
