@@ -11,6 +11,21 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # --- NFS: definer4 (Unraid NAS, 100.105.112.61 over tailscale) ---
+  # Unraid serves NFSv4 read-only, so pin vers=3 (rw; needs local
+  # rpcbind/statd, provided by supportedFilesystems). Shares mount on
+  # first access and unmount after 10 idle minutes (laptop-friendly).
+  boot.supportedFilesystems = [ "nfs" ];
+  fileSystems."/mnt/definer4/perry" = {
+    device = "definer4:/mnt/user/perry";
+    fsType = "nfs";
+    options = [ "noauto" "x-systemd.automount" "x-systemd.idle-timeout=600" "vers=3" ];
+  };
+  fileSystems."/mnt/definer4/media" = {
+    device = "definer4:/mnt/user/media";
+    fsType = "nfs";
+    options = [ "noauto" "x-systemd.automount" "x-systemd.idle-timeout=600" "vers=3" ];
+  };
   # --- laptop-only stuff ---
   hardware.bluetooth.enable = true;
   powerManagement.cpuFreqGovernor = "powersave";
