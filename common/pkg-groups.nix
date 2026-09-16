@@ -42,14 +42,18 @@
     cargo
     nodejs_24  # latest Node LTS (nodejs_26 is current non-LTS until ~Oct 2026)
   ];
-  # herdr (AI coding-agent multiplexer) is only in nixpkgs-unstable, not the
-  # stable 26.05 pin — track it via perry.unstableGroups = [ "ai" ].
-  # Selecting this group from the stable set errors on purpose.
+  # herdr (AI coding-agent multiplexer) and omp (terminal coding agent,
+  # omp.sh) are only in nixpkgs-unstable, not the stable 26.05 pin — track
+  # them via perry.unstableGroups = [ "ai" ]. Selecting this group from the
+  # stable set errors on purpose.
   # dsh (DeepSeek Harness) is repo-local (pkgs/dsh, not in any nixpkgs) and
   # available from both sets via the pkgs/ overlay.
   ai = [
     (pkgs.herdr or (throw (
       "herdr is only in nixpkgs-unstable — add \"ai\" to perry.unstableGroups"
+    )))
+    (pkgs.omp or (throw (
+      "omp is only in nixpkgs-unstable — add \"ai\" to perry.unstableGroups"
     )))
     pkgs.opencode
     pkgs.dsh
