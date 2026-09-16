@@ -17,6 +17,7 @@
   # top level, so individual tools are added here as wanted.)
   dev = with pkgs; [
     git
+    pnpm
   ];
   # Common network/diagnostic tools — safe on any host.
   # (26.05 removed `networkutils` and `bindutils`: ifconfig/netstat/route
