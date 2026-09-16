@@ -37,10 +37,13 @@
         system = "x86_64-linux";
         specialArgs = {
           # Package set for perry.unstableGroups: rolling branch, unfree
-          # allowed (browsers/chat have unfree apps).
+          # allowed (browsers/chat have unfree apps). pkgs/ holds repo-local
+          # overlays for packages not in nixpkgs; they must be applied to BOTH
+          # sets so groups can reference them from either source.
           unstablePkgs = import nixpkgs-unstable {
             system = "x86_64-linux";
             config.allowUnfree = true;
+            overlays = [ (import ./pkgs/dsh) ];
           };
         };
         modules = [

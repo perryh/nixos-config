@@ -18,8 +18,11 @@ No CI, no test suite, no linter — nix eval/parse is the check.
   groups from `nixpkgs-unstable` via `perry.unstableGroups` (default `[]`);
   the group is then installed only from unstable.
 - `common/home.nix` — shared home-manager user config (git identity lives here).
-- `pkgs/` — reserved for repo-local overlays of packages not in nixpkgs
-  (currently empty; herdr is now upstream in nixpkgs).
+- `pkgs/` — repo-local overlays of packages not in nixpkgs (currently `dsh`,
+  a buildNpmPackage from the npm tarball + committed lockfile; herdr is now
+  upstream in nixpkgs). Overlays must be applied to BOTH pkgs sets: stable
+  via `nixpkgs.overlays` in common.nix, unstable via `overlays` in the
+  flake.nix `unstablePkgs` import.
 - `hosts/<name>.nix` — per-host: hostname, loader, laptop/desktop specifics.
 - `hosts/<name>-hardware.nix` — generated disk/luks layout; never hand-edit.
 
@@ -40,7 +43,8 @@ No CI, no test suite, no linter — nix eval/parse is the check.
   docker group; `browsers` → firefox module.
 - `perry.unstableGroups` (same group names) takes groups from the rolling
   `nixpkgs-unstable` input (pinned in `flake.lock`); they're removed from the
-  stable set and installed exactly once. `ai` (herdr) exists ONLY in
+  stable set and installed exactly once. `herdr` (in the `ai` group, with
+  opencode and repo-local dsh) exists ONLY in
   unstable — hosts on the all-groups default must list it in
   `perry.unstableGroups` (perry-eb does); selecting it from the stable set
   throws a clear error.

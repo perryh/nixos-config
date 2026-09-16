@@ -55,6 +55,13 @@ in
     system.stateVersion = "26.05";
     time.timeZone = "America/Los_Angeles";
 
+    # Repo-local overlays for packages not (yet) in nixpkgs (see pkgs/).
+    # Applied to the stable pkgs here; the unstable set (flake.nix) applies
+    # the same overlays so groups can reference them from either source.
+    nixpkgs.overlays = [
+      (import ../pkgs/dsh)
+    ];
+
     i18n.defaultLocale = "en_US.UTF-8";
     i18n.extraLocaleSettings = {
       LC_ADDRESS = "en_US.UTF-8";
