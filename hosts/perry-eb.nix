@@ -5,7 +5,7 @@
   # Desktop GUI apps, language toolchains (and herdr, which only exists in
   # unstable) track nixpkgs-unstable for the latest versions; the OS and
   # everything else stay on the stable 26.05 pin.
-  perry.unstableGroups = [ "browsers" "terminals" "chat" "ai" "langs" ];
+  perry.unstableGroups = [ "browsers" "terminals" "chat" "ai" "langs" "dev-gui" ];
 
   # --- boot loader: systemd-boot (matches the installer's UEFI setup) ---
   boot.loader.systemd-boot.enable = true;

@@ -84,6 +84,12 @@
   office = with pkgs; [
     libreoffice
   ];
+  # GUI developer tools — desktop hosts only. Best tracked via
+  # perry.unstableGroups: VS Code releases monthly and the stable 26.05
+  # pin lags behind.
+  dev-gui = with pkgs; [
+    vscode-fhs  # VS Code in an FHS wrapper (system libs for extensions)
+  ];
   terminals = with pkgs; [
     ghostty  # GPU-accelerated terminal (needs a desktop session)
   ];
