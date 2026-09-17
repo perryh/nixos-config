@@ -81,8 +81,9 @@ in
     # Enable nix-command + flakes declaratively (managed /etc/nix/nix.conf)
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-    # Latest kernel
-    boot.kernelPackages = pkgs.linuxPackages_latest;
+    # Latest kernel (mkDefault: hosts can override, e.g. perry-office pins the
+    # distro default because the nvidia module lags bleeding-edge kernels)
+    boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 
     # --- shared user account ---
     # perryh already exists on each host with a real password; with
