@@ -47,6 +47,7 @@
   in {
     nixosConfigurations."perry-eb" = mkHost "perry-eb";
     # add more hosts here as you bring machines online:
+    nixosConfigurations."perry-office" = mkHost "perry-office";
     # nixosConfigurations.desktop = mkHost "desktop";
   };
 }
