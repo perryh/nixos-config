@@ -1,5 +1,5 @@
 # perry-office (desktop) — per-host: hostname, power, display, bluetooth, etc.
-{ pkgs, ... }: {
+{ config, pkgs, ... }: {
   networking.hostName = "perry-office";
 
   # Desktop GUI apps, language toolchains (and herdr, which only exists in
@@ -11,15 +11,22 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # --- GPU: RTX 3070 Ti (Ampere, 10de:2544) — proprietary userspace, open
+  # --- GPU: RTX 3060 (Ampere, 10de:2544) — proprietary userspace, open
   # kernel module (Ampere+). nvidia-smi ships with the driver package and
-  # lands on PATH via hardware.nvidia. ---
-  # The nvidia module (595.71.05 in stable 26.05) does not compile against
-  # kernel 7.2 (implicit strncpy decl), so this host overrides the shared
-  # latest-kernel pin (common.nix) with the distro default that nixpkgs CI
-  # builds nvidia against. Revisit when 26.05 carries a kernel-7-capable
-  # driver.
-  boot.kernelPackages = pkgs.linuxPackages;
+  # lands on PATH via hardware.nvidia. Runs the shared latest kernel like
+  # every other host: stable 26.05's newest driver (595.71.05) predates
+  # kernel 7.2 (DRM atomic refactor + strncpy removal), so we take the
+  # newer 595.99.02 point release — already packaged on nixpkgs-unstable,
+  # rebuilt here through stable's mkDriver against our pinned kernel.
+  # Drop this override once 26.05 ships >= 595.99.02. ---
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+    version = "595.99.02";
+    sha256_64bit = "sha256-6HR3lYv3YwcFSTJL1a1slI66btIQ5EAFs+/4SUD24ew=";
+    sha256_aarch64 = "sha256-CCqHZTN2KNOZ4yZp2rDcuRJp9pHfRw47k4m4dWnS/2w=";
+    openSha256 = "sha256-T36x/jx8yQ8l3LFp1rZIrTfcSwbGy8YSAvXOUSptpb4=";
+    settingsSha256 = "sha256-GYCcnxfKPrTCrsmd25sMyzfC5cqJQJx0c31haooyTYM=";
+    persistencedSha256 = "sha256-VyKtF/HdHPQrHHK6opSO69M72LmnGZtauuchj9uuje8=";
+  };
   hardware.graphics.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
