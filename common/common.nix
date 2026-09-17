@@ -101,9 +101,19 @@ in
       packages = with pkgs; [
         kdePackages.kate
       ];
-      # Hermes agent access (perry-mini / vm2)
+      # Mirror of https://github.com/perryh.keys (keep in sync when keys are
+      # added/removed there). The perry.huang@gmail.com-commented key is the
+      # Hermes agent access key (perry-mini / vm2).
       openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFYQ1+Nb+RcLPLz9VAW9uyITqSfZQPUuIQXgTw0eUFRL"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEEJJ6/p05Yq8l07mlwFgQd1DVOV9rZ6l2d6qyAqNMUa"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvYwsZafD4nMiMjBGZ+mjVD40PdzfqFUsZHnKv8LYvK"
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO6SOPUNcvb91Tq6t06pEMWp8KeV3btxtpoY0dEMduPC perry.huang@gmail.com"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINH+LQZ4+C4d2F24/gn8jbIaHezeG/rzGR4Ve5+pOdIO"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ5oIQNpW9x3/zi1HqVmlW4tkrXIaF9o/mWh2wKlj3dL"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAvrs3K8Wlo0X25si1uCMPpnueLGM82Jt0iLnmLv9HcY"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG1/xvRqPOYz2T4vRqMz/ZXVQ/DgvCE9sGxrXp2VxoWV"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE2QE1ZjxH4nkkSeJ9XwTInj1GwO9Z7/wplklORJQ15W"
       ];
     };
 
