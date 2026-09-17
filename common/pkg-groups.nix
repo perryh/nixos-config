@@ -74,6 +74,7 @@
   graphics = with pkgs; [
     gimp
     darktable
+    digikam    # photo library manager; SD-card ingest + Google Photos export
     imagemagick
   ];
   media = with pkgs; [
