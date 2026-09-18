@@ -30,6 +30,7 @@
     mtr
     netcat
     nmap
+    iperf3
   ];
   # Language toolchains. Safe on any host, but best tracked via
   # perry.unstableGroups: the stable 26.05 pin lags (python3 3.13, rust 1.95)
