@@ -132,6 +132,43 @@ in
     # --- docker (when the "containers" group is on, from either source) ---
     virtualisation.docker.enable = lib.elem "containers" anyEnabledGroups;
 
+    # --- restic backups (when the "backup" group is on, from either source) ---
+    # The module generates a systemd unit (restic-backups-<name>) + timer per
+    # entry in services.restic.backups. Per-host repo settings live in the
+    # gitignored hosts/<name>.restic-backup.local.nix, so no backup secrets
+    # ever land in this public repo; without that file the group installs the
+    # client only.
+    #
+    # To set up a backup on a host (e.g. perry-office):
+    #   1. Password (secret, NOT in the repo):
+    #        openssl rand -base64 48 | sudo tee /etc/nixos/restic-password
+    #        sudo chmod 600 /etc/nixos/restic-password
+    #   2. Write hosts/<name>.restic-backup.local.nix exporting an
+    #      attrset of backup entries, e.g.:
+    #        {
+    #          home = {
+    #            paths = [ "/home/perryh" "/etc/nixos" ];
+    #            repository = "sftp:perryh@100.90.212.18:/backups/perry-office";
+    #            passwordFile = "/etc/nixos/restic-password";
+    #            pruneOpts = [ "--keep-daily 7" "--keep-weekly 5"
+    #                          "--keep-monthly 12" "--keep-yearly 1" ];
+    #            # timerConfig = { OnCalendar = "daily"; Persistent = true; };
+    #          };
+    #        }
+    #      Module requirements (assertions): exactly one of `repository`,
+    #      `repositoryFile` or `environmentFile`, AND `passwordFile` (or
+    #      `environmentFile`). Default timer: daily, Persistent.
+    #   3. Rebuild; then: sudo systemctl start restic-backups-home.service
+    #      (or wait for the timer). `restic ls`/`restic check` use the same
+    #      env via the createWrapper script the module adds to system PATH.
+    services.restic.backups =
+      let
+        localFile = ./hosts/${config.networking.hostName}.restic-backup.local.nix;
+      in
+      if lib.elem "backup" anyEnabledGroups && builtins.pathExists localFile
+      then import localFile
+      else { };
+
     # --- shared services ---
     services.openssh.enable = true;
     services.printing.enable = true;
