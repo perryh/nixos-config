@@ -20,14 +20,34 @@
     enable = true;
     package = unstablePkgs.omp;
     settings = {
-      setupVersion = 2;
+      modelRoles.default = "github-copilot/gpt-5.6-sol:high";
       providers.webSearchOrder = [
-        "xai" "perplexity" "gemini" "anthropic" "codex" "zai" "exa"
+        "zai" "perplexity" "gemini" "anthropic" "codex" "xai" "exa"
         "tinyfish" "jina" "kagi" "tavily" "firecrawl" "brave" "kimi"
         "parallel" "synthetic" "searxng" "startpage" "duckduckgo"
         "ecosia" "google" "mojeek" "public"
       ];
-      modelRoles.default = "zai/glm-5.3-flash";
+      providers.memoryModel = "online";
+      providers.imageOrder = [ "xai" ];
+      setupVersion = 2;
+      theme.dark = "amethyst";
+      symbolPreset = "unicode";
+      display.showTokenUsage = true;
+      display.showTurnTime = true;
+      memory.backend = "mnemopi";
+      autolearn.enabled = true;
+      autolearn.autoContinue = true;
+      readLineNumbers = true;
+      read.renderMarkdown = true;
+      bash.enabled = true;
+      astGrep.enabled = true;
+      generate_image.enabled = true;
+      checkpoint.enabled = true;
+      github.enabled = true;
+      security.enabled = true;
+      computer.enabled = true;
+      commands.enableOpencodeUser = true;
+      browser.headless = true;
     };
   };
 
