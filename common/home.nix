@@ -20,7 +20,7 @@
     enable = true;
     package = unstablePkgs.omp;
     settings = {
-      modelRoles.default = "github-copilot/gpt-5.6-sol:high";
+      modelRoles.default = "ggpc/qwen3.8-27b:high";
       providers.webSearchOrder = [
         "zai" "perplexity" "gemini" "anthropic" "codex" "xai" "exa"
         "tinyfish" "jina" "kagi" "tavily" "firecrawl" "brave" "kimi"
