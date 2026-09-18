@@ -51,6 +51,31 @@
     };
   };
 
+  # Custom OMP models live in models.yml, separately from config.yml.
+  home.file.".omp/agent/models.yml".source =
+    (pkgs.formats.yaml { }).generate "omp-models.yml" {
+      providers.ggpc = {
+        baseUrl = "http://ggpc:8080/v1";
+        api = "openai-completions";
+        auth = "none";
+        models = [
+          {
+            id = "qwen3.8-27b";
+            name = "Qwen 3.8 27B (GGPC)";
+            reasoning = true;
+            input = [ "text" ];
+            supportsTools = true;
+            contextWindow = 262144;
+            maxTokens = 16384;
+            compat = {
+              supportsToolChoice = true;
+              supportsForcedToolChoice = false;
+            };
+          }
+        ];
+      };
+    };
+
   programs.zsh = {
     enable = true;
     setOptions = [ "histignoredups" ];
