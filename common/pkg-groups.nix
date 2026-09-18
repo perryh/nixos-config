@@ -17,7 +17,11 @@
   # top level, so individual tools are added here as wanted.)
   dev = with pkgs; [
     git
+    dust
+    fd
     pnpm
+    shellcheck
+    tree
   ];
   # Common network/diagnostic tools — safe on any host.
   # (26.05 removed `networkutils` and `bindutils`: ifconfig/netstat/route
@@ -31,6 +35,7 @@
     netcat
     nmap
     iperf3
+    tcpdump
   ];
   # Language toolchains. Safe on any host, but best tracked via
   # perry.unstableGroups: the stable 26.05 pin lags (python3 3.13, rust 1.95)
@@ -63,6 +68,23 @@
   containers = with pkgs; [
     docker
   ];
+  # System/admin utilities — safe on any host (fits no existing group).
+  tools = with pkgs; [
+    p7zip.out  # p7zip (7z/7za); leading-digit names like 7zip aren't valid Nix attrs, and 26.05 has no 7zip reimplementation yet
+    ethtool
+    gptfdisk
+    parted
+    testdisk
+    udisks
+    unzip
+  ];
+  # Restic backup client. The backup service (systemd unit + timer via
+  # services.restic.backups) is wired in common/common.nix, keyed on this
+  # group; per-host repo/password settings live in the gitignored
+  # hosts/<name>.restic-backup.local.nix.
+  backup = with pkgs; [
+    restic
+  ];
 
   # --- desktop-only — omit on headless hosts ---
   browsers = with pkgs; [
@@ -78,8 +100,11 @@
   ];
   media = with pkgs; [
     ffmpeg
+    mediainfo
     mpv
+    ffmpegthumbnailer
     vlc
+    yt-dlp
   ];
   office = with pkgs; [
     libreoffice
