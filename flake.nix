@@ -20,13 +20,20 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # OMP coding agent (omp.sh). Used ONLY for its home-manager module
+    # (programs.omp, owns ~/.omp/agent/config.yml declaratively); the omp
+    # package itself comes from the nixpkgs-unstable pin in home.nix, so this
+    # input adds no build of its own. Refresh: nix flake update omp.
+    omp.url = "github:can1357/oh-my-pi";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager }: let
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, omp }: let
     mkHost = name:
       nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
+          inherit omp;
           # Package set for perry.unstableGroups: rolling branch, unfree
           # allowed (browsers/chat have unfree apps). pkgs/ holds repo-local
           # overlays for packages not in nixpkgs; they must be applied to BOTH

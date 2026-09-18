@@ -8,7 +8,8 @@ No CI, no test suite, no linter — nix eval/parse is the check.
 
 ## Layout
 - `flake.nix` — pins nixpkgs `nixos-26.05` + home-manager `release-26.05`
-  (follows the nixpkgs input); `mkHost "<name>"` wires common + host + hardware.
+  (follows the nixpkgs input) + the `omp` flake (module only — see
+  `common/home.nix`); `mkHost "<name>"` wires common + host + hardware.
 - `common/common.nix` — shared users, services, desktop stack, home-manager,
   and the `perry.systemGroups` option.
 - `common/pkg-groups.nix` — named groups: `core` (gh/neovim/curl/jq), `dev`,
@@ -18,6 +19,12 @@ No CI, no test suite, no linter — nix eval/parse is the check.
   groups from `nixpkgs-unstable` via `perry.unstableGroups` (default `[]`);
   the group is then installed only from unstable.
 - `common/home.nix` — shared home-manager user config (git identity lives here).
+- omp (oh-my-pi, omp.sh) is NOT a package group: it is installed per-user via
+  home-manager — `programs.omp` in `common/home.nix`, package from
+  `nixpkgs-unstable`, module from the `omp` flake input. `programs.omp.settings`
+  overwrite `~/.omp/agent/config.yml` (as a writable copy) on every switch,
+  so edits made inside omp are lost on the next switch — change settings in
+  `common/home.nix` instead.
 - `pkgs/` — repo-local overlays of packages not in nixpkgs (currently `dsh`,
   a buildNpmPackage from the npm tarball + committed lockfile; herdr is now
   upstream in nixpkgs). Overlays must be applied to BOTH pkgs sets: stable

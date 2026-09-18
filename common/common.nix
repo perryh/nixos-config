@@ -5,7 +5,7 @@
 # Package groups: pick per-host which named groups (common/pkg-groups.nix) to
 # install via perry.systemGroups. Default = all groups (desktop). A headless
 # server would set:  perry.systemGroups = [ "core" "dev" "containers" ];
-{ config, pkgs, lib, unstablePkgs, ... }:
+{ config, pkgs, lib, unstablePkgs, omp, ... }:
 
 let
   groups = import ./pkg-groups.nix { inherit pkgs; };
@@ -176,6 +176,12 @@ in
     # --- shared user/home config via home-manager ---
     home-manager.useGlobalPkgs = true;
     home-manager.useUserPackages = true;
+    # OMP coding agent (omp.sh): per-user home-manager install instead of a
+    # system package group. The upstream module (flake input `omp`) provides
+    # programs.omp, which owns ~/.omp/agent/config.yml — see common/home.nix.
+    home-manager.sharedModules = [ omp.homeManagerModules.default ];
+    # Rolling set for per-user packages that track nixpkgs-unstable (home.nix).
+    home-manager.extraSpecialArgs = { inherit unstablePkgs; };
     home-manager.users.perryh = import ./home.nix;
   };
 }
