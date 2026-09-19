@@ -117,7 +117,7 @@
   ];
   # Remote desktop client — desktop hosts only.
   remote = with pkgs; [
-    rustdesk
+    rustdesk-flutter
   ];
   terminals = with pkgs; [
     ghostty  # GPU-accelerated terminal (needs a desktop session)
