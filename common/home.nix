@@ -4,10 +4,16 @@
 { pkgs, unstablePkgs, ... }: {
   home.stateVersion = "26.05";
 
-  home.packages = with pkgs; [
+  home.packages = (with pkgs; [
     ripgrep
     fzf
     eza
+  ]) ++ [
+    # herdr (AI coding-agent multiplexer) — per-user alongside omp, from the
+    # same nixpkgs-unstable pin (unstable-only, like omp's package). On
+    # perry-eb the "ai" system group installs the identical store path too
+    # (deduped, no double install); on the Mac this is the only install.
+    unstablePkgs.herdr
   ];
   # OMP coding agent (omp.sh). Moved here from the system "ai" group — the
   # package tracks the same nixpkgs-unstable pin it always did; the upstream
