@@ -64,11 +64,22 @@
     homeConfigurations.perry-mac =
       home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs { system = "aarch64-darwin"; };
-        extraSpecialArgs = { unstablePkgs = import nixpkgs-unstable { system = "aarch64-darwin"; }; };
+        extraSpecialArgs = {
+          unstablePkgs = import nixpkgs-unstable { system = "aarch64-darwin"; };
+          # home-manager CLI, from the SAME release-26.05 flake input as the
+          # module above (so the command and the module stay version-aligned).
+          # home-manager is not in nixpkgs — the CLI only ships via the
+          # flake's packages.<system>.home-manager.
+          homeManagerPkgs = home-manager.packages.aarch64-darwin;
+        };
         modules = [
-          ({ pkgs, ... }: {
+          ({ pkgs, homeManagerPkgs, ... }: {
             home.homeDirectory = "/Users/perryh";
             home.username = "perryh";
+            # Install the home-manager CLI into the profile so the plain
+            # `home-manager switch --flake ~/git/nixos-config#perry-mac`
+            # command works (merges with common/home.nix's home.packages).
+            home.packages = [ homeManagerPkgs.home-manager ];
             nix.package = pkgs.nix;
             nix.settings.experimental-features = [ "nix-command" "flakes" ];
           })
