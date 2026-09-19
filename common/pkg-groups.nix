@@ -115,6 +115,10 @@
   dev-gui = with pkgs; [
     vscode-fhs  # VS Code in an FHS wrapper (system libs for extensions)
   ];
+  # Remote desktop client — desktop hosts only.
+  remote = with pkgs; [
+    rustdesk
+  ];
   terminals = with pkgs; [
     ghostty  # GPU-accelerated terminal (needs a desktop session)
   ];
