@@ -6,7 +6,8 @@ machine; per-host files hold hostname + hardware. Configured hosts: `perry-eb`
 (laptop, tailscale 100.90.212.18 — this repo is checked out at
 `~/git/nixos-config` there) and `perry-office` (desktop, RTX 3060 nvidia). A
 Mac is covered by a standalone home-manager configuration, `perry-mac`
-(aarch64-darwin, no NixOS host), which reuses `common/home.nix` verbatim.
+(aarch64-darwin, no NixOS host), which reuses `common/home.nix` verbatim and
+installs the non-GUI package groups via `home.packages` (see Mac below).
 No CI, no test suite, no linter — nix parse/eval is the check.
 
 ## Layout
@@ -16,7 +17,8 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `perry.unstableGroups` — never for the OS). `mkHost "<name>"` wires common +
   host + hardware and passes `unstablePkgs` (unstable + `allowUnfree` + the
   `pkgs/` overlays) through `specialArgs`. `homeConfigurations.perry-mac` is
-  the darwin entry point, with its own darwin pkgs imports + home-manager CLI.
+  the darwin entry point, with its own darwin pkgs imports + home-manager CLI,
+  and its own group selection (see Mac below).
 - `common/common.nix` — shared users, services, desktop stack (Plasma 6/sddm),
   home-manager wiring, and the `perry.systemGroups` / `perry.unstableGroups`
   options. Applies the `pkgs/` overlay to the stable set, and wires the
@@ -56,6 +58,31 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `backup` group is on. Each entry needs exactly one of
   `repository`/`repositoryFile`/`environmentFile` plus `passwordFile`.
   Secrets never enter the repo.
+
+## Mac (perry-mac — home-manager only, no NixOS system)
+- `perry.systemGroups` / `environment.systemPackages` do not exist there, and
+  no NixOS side effect applies (no docker daemon, no firefox module, no restic
+  service). CLI tools therefore come from `home.packages`.
+- The Mac picks its groups the way a NixOS host does — but in the
+  `homeConfigurations.perry-mac` module in `flake.nix`, via `cliGroups`
+  (taken from the stable set) + `cliUnstableGroups` (unstable set). Both are
+  expanded from the SAME `common/pkg-groups.nix` definitions, so no list is
+  duplicated. Today: `core dev net tools backup` (stable) + `langs`
+  (unstable). Each group keeps the source the NixOS hosts take it from, so
+  versions stay identical machine to machine. Add a group name to those two
+  lists to change what the Mac gets (GUI groups stay Linux-only).
+- `lib.meta.availableOn pkgs.stdenv.hostPlatform` drops the members nixpkgs
+  marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`) instead of a
+  hand-kept darwin subset — verified against the locked pin. Excluded on
+  purpose: `containers` (no docker daemon on darwin) and `ai` (repo-local
+  `dsh` needs the `pkgs/` overlay and a darwin build; `omp` + `herdr` already
+  reach the Mac through `common/home.nix`).
+- Deploy: `home-manager switch --flake ~/git/nixos-config#perry-mac`.
+- Verify from either Linux host (darwin configs evaluate fine there; they
+  just can't build): `nix eval
+  .#homeConfigurations.perry-mac.config.home.packages --apply 'p: builtins.length (builtins.filter (x: x ? pname) p)'`,
+  whole generation: `nix eval --raw
+  .#homeConfigurations.perry-mac.activationPackage.drvPath`.
 
 ## Commands (verified)
 - Deploy on the host: `sudo nixos-rebuild switch --flake ~/git/nixos-config#perry-eb`

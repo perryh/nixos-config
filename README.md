@@ -11,19 +11,22 @@ machine to machine; per-host files hold hostname + hardware specifics.
   `nix flake lock --update-input nixpkgs`, rebuild all hosts, commit.
   Also pins `nixpkgs-unstable` (rolling) for groups listed in
   `perry.unstableGroups`; refresh with `nix flake update nixpkgs-unstable`.
+  Also defines `homeConfigurations.perry-mac`, the Mac entry point (see
+  [Mac](#mac-perry-mac)).
 - `common/common.nix` — shared users, services, networking, home-manager
   wiring, the `perry.systemGroups` selector, and the `perry.unstableGroups`
   selector (same group names served from the rolling unstable branch).
-- `common/pkg-groups.nix` — named package groups (`core`, `dev`, `containers`,
-  `browsers`, `graphics`, `media`, `office`, `terminals`, `chat`, `ai`). A
-  host picks its set with `perry.systemGroups`; default is all of them.
-  Headless servers drop the GUI groups (see below). `ai` (herdr) is
-  nixpkgs-unstable-only — it must be in `perry.unstableGroups`, not the
-  stable set.
+- `common/pkg-groups.nix` — named package groups (`core`, `dev`, `net`,
+  `langs`, `ai`, `containers`, `tools`, `backup` are safe on any host;
+  `browsers`, `graphics`, `media`, `office`, `dev-gui`, `remote`, `terminals`,
+  `chat` are desktop-only). A host picks its set with `perry.systemGroups`;
+  default is all of them. Headless servers drop the GUI groups (see below).
+  `ai` (herdr) is nixpkgs-unstable-only — it must be in
+  `perry.unstableGroups`, not the stable set.
 - `common/home.nix` — shared user config via home-manager (zsh, git identity,
   ripgrep/fzf/eza).
-- `pkgs/` — reserved for repo-local derivations of packages not in nixpkgs
-  (currently empty; herdr is now upstream). Pattern when one is needed: an
+- `pkgs/` — repo-local derivations of packages not in nixpkgs (currently
+  `dsh`, built from its published npm tarball). Pattern: an
   overlay in `pkgs/<name>.nix` added to `nixpkgs.overlays` in
   `common/common.nix`, referenced by name in a group.
 - `hosts/<name>.nix` — per-host: hostname, boot loader, laptop/desktop
@@ -43,20 +46,31 @@ so a desktop needs no assignment):
 perry.systemGroups = [ "core" "dev" "containers" ];
 ```
 
-Groups:
+Groups (safe on any host — including headless servers and the Mac):
+
+| group        | packages                                                     |
+|--------------|--------------------------------------------------------------|
+| `core`       | gh, neovim, vim, curl, jq                                    |
+| `dev`        | git, dust, fd, pnpm, shellcheck, tree                        |
+| `net`        | whois, net-tools, iputils, bind.dnsutils, mtr, netcat, nmap, iperf3, tcpdump |
+| `langs`      | go, python3, ruby, rustc, cargo, nodejs                      |
+| `ai`         | herdr (unstable-only), opencode, dsh (repo-local)            |
+| `containers` | docker                                                       |
+| `tools`      | p7zip, ethtool, gptfdisk, parted, testdisk, udisks, unzip    |
+| `backup`     | restic                                                       |
+
+Desktop-only (omit on headless hosts):
 
 | group        | packages                                            |
 |--------------|-----------------------------------------------------|
-| `core`       | gh, neovim, curl, jq                                |
-| `dev`        | git                                                 |
-| `containers` | docker                                              |
 | `browsers`   | firefox, brave, google-chrome                       |
-| `graphics`   | gimp, darktable, imagemagick                        |
-| `media`      | ffmpeg, mpv, vlc                                    |
+| `graphics`   | gimp, darktable, digikam, imagemagick               |
+| `media`      | ffmpeg, mediainfo, mpv, ffmpegthumbnailer, vlc, yt-dlp |
 | `office`     | libreoffice                                         |
+| `dev-gui`    | vscode-fhs                                          |
+| `remote`     | rustdesk-flutter                                    |
 | `terminals`  | ghostty                                             |
 | `chat`       | vesktop, signal-desktop, slack                      |
-| `ai`         | herdr, opencode (see below)                         |
 
 Selecting `containers` also enables the `docker` daemon and adds the user to
 the `docker` group; selecting `browsers` also enables the `firefox` module.
@@ -77,6 +91,33 @@ dropped). Refresh those apps with `nix flake update nixpkgs-unstable` +
 rebuild; remove a group from the list to return it to the stable pin.
 Note the `ai` group (herdr) exists only in unstable — hosts that don't list
 it in `perry.unstableGroups` get a clear error if the stable set includes it.
+
+## Mac (perry-mac)
+
+`perry-mac` (aarch64-darwin) is a standalone home-manager configuration — no
+NixOS, so the package groups cannot come from `environment.systemPackages` and
+no group side effect applies (no docker daemon, no firefox module, no restic
+service). Deploy with:
+
+```sh
+home-manager switch --flake ~/git/nixos-config#perry-mac
+```
+
+Which groups the Mac gets is set in the `homeConfigurations.perry-mac` module
+in `flake.nix`: `cliGroups` comes from the stable pin, `cliUnstableGroups`
+from `nixpkgs-unstable`, and both expand the same `common/pkg-groups.nix`
+definitions the NixOS hosts use. Currently `core dev net tools backup` +
+`langs`, so the Mac has `gh`, `git`, `neovim`, `jq`, `restic`, the language
+toolchains and the network tooling. Each group keeps the source the NixOS
+hosts take it from, so versions stay identical machine to machine; groups the
+hosts track from unstable need to be listed in `cliUnstableGroups` to stay in
+step.
+
+Members nixpkgs marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`)
+are filtered out automatically. The GUI groups stay Linux-only, and
+`containers` / `ai` are excluded on purpose (no docker daemon on darwin; the
+repo-local `dsh` would need the `pkgs/` overlay and a darwin build — `omp` and
+`herdr` already reach the Mac through `common/home.nix`).
 
 ## First boot on a machine
 
@@ -106,6 +147,6 @@ When a package isn't in nixpkgs at all, add a repo-local derivation under
 `pkgs/<name>.nix` as an overlay (wired into `nixpkgs.overlays` in
 `common/common.nix`, referenced by name in a group). Prebuilt release
 binaries: `final.runCommand` + `fetchurl` (SRI hash = base64 of the raw
-sha256 bytes) — never `mkDerivation` for a bare executable. (Currently no
-such packages: herdr was upstreamed into nixpkgs and the repo-local overlay
-was removed.)
+sha256 bytes) — never `mkDerivation` for a bare executable. (Currently one
+such package: `dsh`, the DeepSeek Harness CLI, built with `buildNpmPackage`
+from the published npm tarball — refresh recipe in `pkgs/dsh/default.nix`.)

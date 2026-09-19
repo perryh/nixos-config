@@ -73,16 +73,44 @@
           homeManagerPkgs = home-manager.packages.aarch64-darwin;
         };
         modules = [
-          ({ pkgs, homeManagerPkgs, ... }: {
-            home.homeDirectory = "/Users/perryh";
-            home.username = "perryh";
-            # Install the home-manager CLI into the profile so the plain
-            # `home-manager switch --flake ~/git/nixos-config#perry-mac`
-            # command works (merges with common/home.nix's home.packages).
-            home.packages = [ homeManagerPkgs.home-manager ];
-            nix.package = pkgs.nix;
-            nix.settings.experimental-features = [ "nix-command" "flakes" ];
-          })
+          ({ pkgs, unstablePkgs, homeManagerPkgs, ... }:
+            let
+              lib = pkgs.lib;
+              # A Mac has no NixOS system, so perry.systemGroups /
+              # environment.systemPackages (common/common.nix) do not exist
+              # here. It selects groups from the SAME definitions
+              # (common/pkg-groups.nix) the hosts use, the same way a NixOS
+              # host does in hosts/<name>.nix. The non-GUI groups only —
+              # desktop GUI groups (firefox/ghostty/rustdesk/vscode-fhs/
+              # LibreOffice) stay Linux-only.
+              stableGroups = import ./common/pkg-groups.nix { inherit pkgs; };
+              unstableGroups = import ./common/pkg-groups.nix { pkgs = unstablePkgs; };
+              # Each group keeps the source the NixOS hosts take it from, so
+              # versions stay identical machine to machine. `langs` is the
+              # only non-GUI group both hosts track from nixpkgs-unstable.
+              cliGroups = [ "core" "dev" "net" "tools" "backup" ];
+              cliUnstableGroups = [ "langs" ];
+              # Drop what nixpkgs marks Linux-only (iputils, ethtool, parted,
+              # udisks) instead of hand-maintaining a darwin subset. Excluded
+              # on purpose: `containers` (docker daemon does not apply on
+              # darwin) and `ai` (its repo-local dsh needs the pkgs/ overlay
+              # and a darwin build; opencode/dsh stay on the NixOS hosts).
+              forPlatform = builtins.filter
+                (p: lib.meta.availableOn pkgs.stdenv.hostPlatform p);
+              cliPackages = forPlatform
+                (builtins.concatLists (map (g: stableGroups.${g}) cliGroups)
+                  ++ builtins.concatLists (map (g: unstableGroups.${g}) cliUnstableGroups));
+            in {
+              home.homeDirectory = "/Users/perryh";
+              home.username = "perryh";
+              # Install the home-manager CLI into the profile so the plain
+              # `home-manager switch --flake ~/git/nixos-config#perry-mac`
+              # command works, plus the CLI groups above (merges with
+              # common/home.nix's home.packages: ripgrep/fzf/eza/herdr/omp).
+              home.packages = [ homeManagerPkgs.home-manager ] ++ cliPackages;
+              nix.package = pkgs.nix;
+              nix.settings.experimental-features = [ "nix-command" "flakes" ];
+            })
           omp.homeManagerModules.default
           ./common/home.nix
         ];
