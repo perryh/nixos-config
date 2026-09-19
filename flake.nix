@@ -58,10 +58,10 @@
     # Mac (standalone home-manager, no NixOS host): reuses common/home.nix
     # verbatim — same home packages, omp settings + models, zsh, git identity.
     # The same nixpkgs-unstable pin is imported for darwin, so programs.omp
-    # resolves to the identical version as the Linux hosts. Apple Silicon —
-    # for an Intel Mac, switch both systems to x86_64-darwin. No repo-local
-    # overlays: home.nix only needs unstablePkgs.omp.
-    homeConfigurations.perryh-mac =
+    # and the home herdr resolve to the identical version as the Linux hosts.
+    # Apple Silicon — for an Intel Mac, switch both systems to x86_64-darwin.
+    # No repo-local overlays: home.nix only needs unstablePkgs.omp + .herdr.
+    homeConfigurations.perry-mac =
       home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs { system = "aarch64-darwin"; };
         extraSpecialArgs = { unstablePkgs = import nixpkgs-unstable { system = "aarch64-darwin"; }; };
