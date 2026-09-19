@@ -66,7 +66,12 @@
         pkgs = import nixpkgs { system = "aarch64-darwin"; };
         extraSpecialArgs = { unstablePkgs = import nixpkgs-unstable { system = "aarch64-darwin"; }; };
         modules = [
-          { home.homeDirectory = "/Users/perryh"; home.username = "perryh"; }
+          ({ pkgs, ... }: {
+            home.homeDirectory = "/Users/perryh";
+            home.username = "perryh";
+            nix.package = pkgs.nix;
+            nix.settings.experimental-features = [ "nix-command" "flakes" ];
+          })
           omp.homeManagerModules.default
           ./common/home.nix
         ];
