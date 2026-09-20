@@ -51,15 +51,16 @@
   # herdr (AI coding-agent multiplexer) is only in nixpkgs-unstable, not the
   # stable 26.05 pin — track it via perry.unstableGroups = [ "ai" ]. Selecting
   # this group from the stable set errors on purpose.
-  # (omp moved out of this group entirely: it is installed per-user by
-  # home-manager — programs.omp in common/home.nix.)
+  # (omp and opencode moved out of this group entirely: both are installed
+  # per-user by home-manager — programs.omp / programs.opencode in
+  # common/home.nix — so the Mac, which has no system groups, gets them too.
+  # opencode's package comes from the repo-local pkgs/opencode overlay.)
   # dsh (DeepSeek Harness) is repo-local (pkgs/dsh, not in any nixpkgs) and
   # available from both sets via the pkgs/ overlay.
   ai = [
     (pkgs.herdr or (throw (
       "herdr is only in nixpkgs-unstable — add \"ai\" to perry.unstableGroups"
     )))
-    pkgs.opencode
     pkgs.dsh
   ];
   # (dockerTools is a helper attrset — pullImage/buildImage functions — not a

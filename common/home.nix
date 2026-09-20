@@ -57,6 +57,17 @@
     };
   };
 
+  # OpenCode 2 CLI (opencode.ai) — installed per-user for the same reason as
+  # omp: the "ai" system group is Linux-only, so the Mac would never see it.
+  # The package is the repo-local pkgs/opencode overlay (upstream's v2 build
+  # recipe — see that file). Only the binary is declared: ~/.config/opencode/
+  # stays hand-written, since v2 normalizes the v1-shaped config in memory
+  # (verified: the ggpc provider + qwen3.8-27b model resolve unchanged).
+  programs.opencode = {
+    enable = true;
+    package = pkgs.opencode;
+  };
+
   # Custom OMP models live in models.yml, separately from config.yml.
   home.file.".omp/agent/models.yml".source =
     (pkgs.formats.yaml { }).generate "omp-models.yml" {
