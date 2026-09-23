@@ -13,9 +13,7 @@
     # to 1.4.2 and opencode's nixpkgs derivation compiles the CLI from source
     # with nixpkgs' `bun`, which crashed on bun 1.4.2
     # (github.com/anomalyco/opencode/issues/48372). Upstream fixed it in
-    # opencode 1.18.31, so this follows rolling again. (opencode itself is no
-    # longer taken from this set — it comes from the repo-local pkgs/opencode
-    # overlay, which builds v2 from source; see that file.)
+    # opencode 1.18.31, so this follows rolling again.
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
@@ -62,14 +60,10 @@
     # The same nixpkgs-unstable pin is imported for darwin, so programs.omp
     # and the home herdr resolve to the identical version as the Linux hosts.
     # Apple Silicon — for an Intel Mac, switch both systems to x86_64-darwin.
-    # home.nix needs pkgs.opencode (repo-local overlay, so it is applied to this
-    # set as well) alongside unstablePkgs.omp + .herdr.
+    # No repo-local overlays: home.nix only needs unstablePkgs.omp + .herdr.
     homeConfigurations.perry-mac =
       home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs {
-          system = "aarch64-darwin";
-          overlays = [ (import ./pkgs/opencode) ];
-        };
+        pkgs = import nixpkgs { system = "aarch64-darwin"; };
         extraSpecialArgs = {
           unstablePkgs = import nixpkgs-unstable { system = "aarch64-darwin"; };
           # home-manager CLI, from the SAME release-26.05 flake input as the
@@ -99,9 +93,8 @@
               # Drop what nixpkgs marks Linux-only (iputils, ethtool, parted,
               # udisks) instead of hand-maintaining a darwin subset. Excluded
               # on purpose: `containers` (docker daemon does not apply on
-              # darwin) and `ai` (its repo-local dsh needs a darwin build; dsh
-              # stays on the NixOS hosts — opencode no longer lives in the
-              # group and reaches the Mac through common/home.nix instead).
+              # darwin) and `ai` (its repo-local dsh needs the pkgs/ overlay
+              # and a darwin build; opencode/dsh stay on the NixOS hosts).
               forPlatform = builtins.filter
                 (p: lib.meta.availableOn pkgs.stdenv.hostPlatform p);
               cliPackages = forPlatform

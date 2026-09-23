@@ -57,12 +57,9 @@ in
 
     # Repo-local overlays for packages not (yet) in nixpkgs (see pkgs/).
     # Applied to the stable pkgs here; the unstable set (flake.nix) applies
-    # the same overlays so groups can reference them from either source — except
-    # opencode, which is stable-only on purpose (it is built with this set's bun,
-    # see pkgs/opencode/default.nix).
+    # the same overlays so groups can reference them from either source.
     nixpkgs.overlays = [
       (import ../pkgs/dsh)
-      (import ../pkgs/opencode)
     ];
 
     i18n.defaultLocale = "en_US.UTF-8";

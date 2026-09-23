@@ -24,13 +24,11 @@ machine to machine; per-host files hold hostname + hardware specifics.
   `ai` (herdr) is nixpkgs-unstable-only — it must be in
   `perry.unstableGroups`, not the stable set.
 - `common/home.nix` — shared user config via home-manager (zsh, git identity,
-  ripgrep/fzf/eza, omp, opencode v2).
-- `pkgs/` — repo-local overlays of packages not in nixpkgs: `dsh`, built from
-  its published npm tarball, and `opencode`, built from upstream's own nix
-  recipe at the v2 release tag. Pattern: an overlay in
-  `pkgs/<name>/default.nix` added to `nixpkgs.overlays` in `common/common.nix`
-  (plus the Mac's pkgs import in `flake.nix`), referenced by name — from a
-  group, or from `common/home.nix` for the per-user tools.
+  ripgrep/fzf/eza).
+- `pkgs/` — repo-local derivations of packages not in nixpkgs (currently
+  `dsh`, built from its published npm tarball). Pattern: an
+  overlay in `pkgs/<name>.nix` added to `nixpkgs.overlays` in
+  `common/common.nix`, referenced by name in a group.
 - `hosts/<name>.nix` — per-host: hostname, boot loader, laptop/desktop
   specifics, and `perry.systemGroups` for that machine.
 - `hosts/<name>-hardware.nix` — per-host boot/filesystem/disk. Regenerate with
@@ -56,7 +54,7 @@ Groups (safe on any host — including headless servers and the Mac):
 | `dev`        | git, dust, fd, pnpm, shellcheck, tree                        |
 | `net`        | whois, net-tools, iputils, bind.dnsutils, mtr, netcat, nmap, iperf3, tcpdump |
 | `langs`      | go, python3, ruby, rustc, cargo, nodejs                      |
-| `ai`         | herdr (unstable-only), dsh (repo-local)                      |
+| `ai`         | herdr (unstable-only), opencode, dsh (repo-local)            |
 | `containers` | docker                                                       |
 | `tools`      | p7zip, ethtool, gptfdisk, parted, testdisk, udisks, unzip    |
 | `backup`     | restic                                                       |
@@ -118,9 +116,8 @@ step.
 Members nixpkgs marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`)
 are filtered out automatically. The GUI groups stay Linux-only, and
 `containers` / `ai` are excluded on purpose (no docker daemon on darwin; the
-repo-local `dsh` would need a darwin build). The per-user tools do reach the
-Mac through `common/home.nix`: `omp`, `herdr` and `opencode` v2 (whose package
-comes from the `pkgs/opencode` overlay, also applied to the Mac's pkgs set).
+repo-local `dsh` would need the `pkgs/` overlay and a darwin build — `omp` and
+`herdr` already reach the Mac through `common/home.nix`).
 
 ## First boot on a machine
 
@@ -146,23 +143,10 @@ single source of truth.
 
 ## Packages not in nixpkgs
 
-When a package isn't in nixpkgs at all, add a repo-local overlay under
-`pkgs/<name>/default.nix`, wire it into `nixpkgs.overlays` in
-`common/common.nix` (and the perry-mac pkgs import in `flake.nix`), and
-reference it by name — from a group, or from `common/home.nix` for the
-per-user tools. `environment.systemPackages` never lists bare packages.
-
-Two packages today:
-
-- `dsh` (DeepSeek Harness CLI) — `buildNpmPackage` over the published npm
-  tarball; refresh recipe in `pkgs/dsh/default.nix`.
-- `opencode` (v2) — upstream's own `nix/opencode.nix`, called from its source
-  tree at the release tag, so no build logic is duplicated here; refresh recipe
-  in `pkgs/opencode/default.nix`. It builds with the stable pin's bun (upstream's
-  `nix/hashes.json` node_modules hash is bun-version specific), which is why its
-  overlay is applied to the stable sets only.
-
-Prebuilt release binaries are only safe when nothing has to rewrite them:
-bun single-file executables (e.g. opencode's own npm `@opencode/cli-<os>-<arch>`
-tarballs) silently degrade to plain `bun` under `patchelf`, and NixOS has no
-real `/lib64/ld-linux-x86-64.so.2` for them to use unpatched.
+When a package isn't in nixpkgs at all, add a repo-local derivation under
+`pkgs/<name>.nix` as an overlay (wired into `nixpkgs.overlays` in
+`common/common.nix`, referenced by name in a group). Prebuilt release
+binaries: `final.runCommand` + `fetchurl` (SRI hash = base64 of the raw
+sha256 bytes) — never `mkDerivation` for a bare executable. (Currently one
+such package: `dsh`, the DeepSeek Harness CLI, built with `buildNpmPackage`
+from the published npm tarball — refresh recipe in `pkgs/dsh/default.nix`.)
