@@ -86,10 +86,11 @@
               stableGroups = import ./common/pkg-groups.nix { inherit pkgs; };
               unstableGroups = import ./common/pkg-groups.nix { pkgs = unstablePkgs; };
               # Each group keeps the source the NixOS hosts take it from, so
-              # versions stay identical machine to machine. `langs` is the
-              # only non-GUI group both hosts track from nixpkgs-unstable.
-              cliGroups = [ "core" "dev" "net" "tools" "backup" ];
-              cliUnstableGroups = [ "langs" ];
+              # versions stay identical machine to machine. `dev` and `langs`
+              # are the only non-GUI groups both hosts track from
+              # nixpkgs-unstable.
+              cliGroups = [ "core" "net" "tools" "backup" ];
+              cliUnstableGroups = [ "langs" "dev" ];
               # Drop what nixpkgs marks Linux-only (iputils, ethtool, parted,
               # udisks) instead of hand-maintaining a darwin subset. Excluded
               # on purpose: `containers` (docker daemon does not apply on

@@ -15,6 +15,9 @@
   # --- safe on ANY host, including headless servers ---
   # (gitAndTools was removed in nixos-26.05 — its members now live at the
   # top level, so individual tools are added here as wanted.)
+  # Developer CLI tools. Safe on any host, but best tracked via
+  # perry.unstableGroups (both hosts do): zola releases fast and the
+  # stable 26.05 pin lags (0.22.1 there vs 0.23.6 on unstable).
   dev = with pkgs; [
     git
     dust
@@ -22,6 +25,7 @@
     pnpm
     shellcheck
     tree
+    zola # static site generator
   ];
   # Common network/diagnostic tools — safe on any host.
   # (26.05 removed `networkutils` and `bindutils`: ifconfig/netstat/route
