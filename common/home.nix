@@ -54,6 +54,7 @@
       computer.enabled = true;
       commands.enableOpencodeUser = true;
       browser.headless = true;
+      composer.tokenRate = true; # show streaming tok/s at the composer
     };
   };
 
