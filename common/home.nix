@@ -55,6 +55,7 @@
       commands.enableOpencodeUser = true;
       browser.headless = true;
       composer.tokenRate = true; # show streaming tok/s at the composer
+      display.cacheMissMarker = true; # flag assistant turns that missed the prompt cache
     };
   };
 
