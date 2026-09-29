@@ -60,6 +60,7 @@ in
     # the same overlays so groups can reference them from either source.
     nixpkgs.overlays = [
       (import ../pkgs/dsh)
+      (import ../pkgs/opencode)
     ];
 
     i18n.defaultLocale = "en_US.UTF-8";

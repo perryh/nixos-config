@@ -35,8 +35,9 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   (default `[]`); such a group is removed from the stable set and installed
   from unstable exactly once.
 - `common/home.nix` — shared home-manager user config: git identity, zsh +
-  oh-my-zsh, `programs.omp` settings, the custom GGPC provider rendered into
-  `~/.omp/agent/models.yml` by `home.file`, and the per-user
+  oh-my-zsh, `programs.omp` settings, `programs.opencode` (binary only, from
+  the repo-local `pkgs/opencode` overlay), the custom GGPC provider rendered
+  into `~/.omp/agent/models.yml` by `home.file`, and the per-user
   `unstablePkgs.herdr`.
 - omp (oh-my-pi, omp.sh) is NOT a package group: it is installed per-user via
   home-manager — `programs.omp` in `common/home.nix`, package from
@@ -44,11 +45,21 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   overwrite `~/.omp/agent/config.yml` (as a writable copy) on every switch,
   so edits made inside omp are lost on the next switch — same for
   `models.yml`; change settings in `common/home.nix` instead.
-- `pkgs/` — repo-local overlays of packages not in nixpkgs (currently `dsh`,
-  a `buildNpmPackage` from the published npm tarball: prebuilt `lib/`, a
-  committed lockfile, and the refresh recipe in `pkgs/dsh/default.nix`).
-  Overlays must be applied to BOTH pkgs sets: stable via `nixpkgs.overlays` in
-  common.nix, unstable via `overlays` in the flake.nix `unstablePkgs` import.
+- OpenCode 2 (opencode.ai) is installed the same way: `programs.opencode` in
+  `common/home.nix`, package from the repo-local `pkgs/opencode` overlay (the
+  locked stable 26.05 pin carries opencode 1.15.10 and rolling 1.18.x, so v2
+  is packaged there from upstream's published npm binaries; version + hashes
+  are pinned in that file, and autoupdate is disabled in its wrapper). No
+  `programs.opencode.settings`: the module only writes `~/.config/opencode/
+  opencode.json` + `tui.json` when those options are set, and this machine's
+  files are hand-written.
+- `pkgs/` — repo-local overlays of packages not in nixpkgs: `dsh`
+  (a `buildNpmPackage` from the published npm tarball: prebuilt `lib/`, a
+  committed lockfile) and `opencode` (OpenCode 2: `fetchurl` of upstream's
+  per-platform npm binary, patchelf'd for NixOS). Refresh recipes live in each
+  `default.nix`. Overlays must be applied to BOTH pkgs sets: stable via
+  `nixpkgs.overlays` in common.nix, unstable via `overlays` in the flake.nix
+  `unstablePkgs` import.
 - `hosts/<name>.nix` — per-host: hostname, `perry.unstableGroups`, loader,
   NFS mounts, laptop/desktop specifics (perry-office overrides the nvidia
   driver package).
@@ -75,8 +86,9 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`) instead of a
   hand-kept darwin subset — verified against the locked pin. Excluded on
   purpose: `containers` (no docker daemon on darwin) and `ai` (repo-local
-  `dsh` needs the `pkgs/` overlay and a darwin build; `omp` + `herdr` already
-  reach the Mac through `common/home.nix`).
+  `dsh` needs a darwin build; `omp`, `opencode` + `herdr` already reach the Mac
+  through `common/home.nix`). The Mac's pkgs import applies the `pkgs/opencode`
+  overlay for the same reason the hosts do — `home.nix` installs it there.
 - Deploy: `home-manager switch --flake ~/git/nixos-config#perry-mac`.
 - Verify from either Linux host (darwin configs evaluate fine there; they
   just can't build): `nix eval
@@ -117,7 +129,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `nixpkgs-unstable` input (pinned in `flake.lock`); they're removed from the
   stable set and installed exactly once. Both hosts currently track
   `[ "browsers" "terminals" "chat" "ai" "langs" "dev-gui" "remote" ]`.
-- `herdr` (in the `ai` group, with opencode and repo-local dsh) exists ONLY in
+- `herdr` (in the `ai` group, with repo-local dsh) exists ONLY in
   unstable — hosts on the all-groups default must list it in
   `perry.unstableGroups` (both do); selecting it from the stable set throws a
   clear error.
@@ -127,10 +139,14 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `nixosConfigurations."<name>" = mkHost "<name>";` (name quoted) in flake.nix.
 - Any module defining top-level `options` (like common.nix) must put every
   config attr under an explicit `config = { ... }`.
-- Prebuilt binary in `pkgs/`: `final.runCommand` + `fetchurl`; the SRI hash is
-  base64 of the raw sha256 bytes. Never mkDerivation for a bare executable.
-  (No such packages currently — herdr was upstreamed to nixpkgs; its
-  repo-local overlay was removed in favor of the `ai` group.)
+- Prebuilt binaries in `pkgs/`: `fetchurl` + `mkDerivation` with the SRI hash
+  per system (base64 of the raw sha256 bytes; `nix store prefetch-file` hashes
+  any URL from any machine, so darwin hashes are checkable on Linux). A bare
+  static executable needs no more; a glibc-dynamic one needs
+  `patchelf --set-interpreter/--set-rpath` to the nix loader (NixOS has no
+  `/lib64/ld-linux-*.so.2`). Never `runCommand` a binary you must patch — and
+  never run a fetched bun/bundled executable through the loader by hand
+  instead: `pkgs/opencode` documents why (the CLI re-executes itself).
 - `perryh`'s `openssh.authorizedKeys` mirror `github.com/perryh.keys` — keep
   in sync when keys change there.
 - Secrets only in gitignored `*.local.nix` / `local/` (the repo is public).

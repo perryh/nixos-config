@@ -24,11 +24,13 @@ machine to machine; per-host files hold hostname + hardware specifics.
   `ai` (herdr) is nixpkgs-unstable-only — it must be in
   `perry.unstableGroups`, not the stable set.
 - `common/home.nix` — shared user config via home-manager (zsh, git identity,
-  ripgrep/fzf/eza).
+  ripgrep/fzf/eza, and the per-user agent CLIs `omp` + `opencode` 2).
 - `pkgs/` — repo-local derivations of packages not in nixpkgs (currently
-  `dsh`, built from its published npm tarball). Pattern: an
-  overlay in `pkgs/<name>.nix` added to `nixpkgs.overlays` in
-  `common/common.nix`, referenced by name in a group.
+  `dsh`, built from its published npm tarball, and `opencode`, OpenCode 2 from
+  upstream's published binaries). Pattern: an overlay in
+  `pkgs/<name>/default.nix` added to `nixpkgs.overlays` in
+  `common/common.nix` (and to the flake's pkgs imports), referenced by name in
+  a group or in `common/home.nix`.
 - `hosts/<name>.nix` — per-host: hostname, boot loader, laptop/desktop
   specifics, and `perry.systemGroups` for that machine.
 - `hosts/<name>-hardware.nix` — per-host boot/filesystem/disk. Regenerate with
@@ -54,7 +56,7 @@ Groups (safe on any host — including headless servers and the Mac):
 | `dev`        | git, dust, fd, pnpm, shellcheck, tree                        |
 | `net`        | whois, net-tools, iputils, bind.dnsutils, mtr, netcat, nmap, iperf3, tcpdump |
 | `langs`      | go, python3, ruby, rustc, cargo, nodejs                      |
-| `ai`         | herdr (unstable-only), opencode, dsh (repo-local)            |
+| `ai`         | herdr (unstable-only), dsh (repo-local)                      |
 | `containers` | docker                                                       |
 | `tools`      | p7zip, ethtool, gptfdisk, parted, testdisk, udisks, unzip    |
 | `backup`     | restic                                                       |
@@ -116,7 +118,7 @@ step.
 Members nixpkgs marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`)
 are filtered out automatically. The GUI groups stay Linux-only, and
 `containers` / `ai` are excluded on purpose (no docker daemon on darwin; the
-repo-local `dsh` would need the `pkgs/` overlay and a darwin build — `omp` and
+repo-local `dsh` would need a darwin build — `omp`, `opencode` and
 `herdr` already reach the Mac through `common/home.nix`).
 
 ## First boot on a machine
@@ -144,9 +146,10 @@ single source of truth.
 ## Packages not in nixpkgs
 
 When a package isn't in nixpkgs at all, add a repo-local derivation under
-`pkgs/<name>.nix` as an overlay (wired into `nixpkgs.overlays` in
-`common/common.nix`, referenced by name in a group). Prebuilt release
-binaries: `final.runCommand` + `fetchurl` (SRI hash = base64 of the raw
-sha256 bytes) — never `mkDerivation` for a bare executable. (Currently one
-such package: `dsh`, the DeepSeek Harness CLI, built with `buildNpmPackage`
-from the published npm tarball — refresh recipe in `pkgs/dsh/default.nix`.)
+`pkgs/<name>/default.nix` as an overlay (wired into `nixpkgs.overlays` in
+`common/common.nix` and the flake's pkgs imports, referenced by name in a group
+or in `common/home.nix`). Today: `dsh`, the DeepSeek Harness CLI, built with
+`buildNpmPackage` from the published npm tarball; and `opencode`, OpenCode 2
+built from upstream's published per-platform npm binaries (`fetchurl` + one SRI
+hash per system, patchelf'd to the nix loader — refresh recipes in each
+`default.nix`).

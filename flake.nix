@@ -10,10 +10,11 @@
     #
     # Tracks the rolling branch. Was temporarily pinned to a 2026-09-10 rev
     # (b1822af: opencode 1.18.29 + bun 1.3.13) because rolling had bumped bun
-    # to 1.4.2 and opencode's nixpkgs derivation compiles the CLI from source
-    # with nixpkgs' `bun`, which crashed on bun 1.4.2
-    # (github.com/anomalyco/opencode/issues/48372). Upstream fixed it in
-    # opencode 1.18.31, so this follows rolling again.
+    # to 1.4.2 and opencode's then-source-built derivation crashed on it
+    # (github.com/anomalyco/opencode/issues/48372), fixed in opencode 1.18.31 —
+    # moot for this repo now: opencode no longer comes from nixpkgs at all
+    # (repo-local pkgs/opencode installs OpenCode 2 from upstream's prebuilt
+    # binaries, neither set's bun involved).
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
@@ -37,11 +38,15 @@
           # Package set for perry.unstableGroups: rolling branch, unfree
           # allowed (browsers/chat have unfree apps). pkgs/ holds repo-local
           # overlays for packages not in nixpkgs; they must be applied to BOTH
-          # sets so groups can reference them from either source.
+          # sets so groups can reference them from either source (both
+          # overlays are version-pinned in-repo, so the two sets agree).
           unstablePkgs = import nixpkgs-unstable {
             system = "x86_64-linux";
             config.allowUnfree = true;
-            overlays = [ (import ./pkgs/dsh) ];
+            overlays = [
+              (import ./pkgs/dsh)
+              (import ./pkgs/opencode)
+            ];
           };
         };
         modules = [
@@ -60,10 +65,15 @@
     # The same nixpkgs-unstable pin is imported for darwin, so programs.omp
     # and the home herdr resolve to the identical version as the Linux hosts.
     # Apple Silicon — for an Intel Mac, switch both systems to x86_64-darwin.
-    # No repo-local overlays: home.nix only needs unstablePkgs.omp + .herdr.
+    # The pkgs/opencode overlay is applied here too: common/home.nix installs
+    # programs.opencode from it (the prebuilt darwin-arm64 binary). dsh is not
+    # — it stays in the Linux-only "ai" group.
     homeConfigurations.perry-mac =
       home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs { system = "aarch64-darwin"; };
+        pkgs = import nixpkgs {
+          system = "aarch64-darwin";
+          overlays = [ (import ./pkgs/opencode) ];
+        };
         extraSpecialArgs = {
           unstablePkgs = import nixpkgs-unstable { system = "aarch64-darwin"; };
           # home-manager CLI, from the SAME release-26.05 flake input as the
@@ -94,8 +104,9 @@
               # Drop what nixpkgs marks Linux-only (iputils, ethtool, parted,
               # udisks) instead of hand-maintaining a darwin subset. Excluded
               # on purpose: `containers` (docker daemon does not apply on
-              # darwin) and `ai` (its repo-local dsh needs the pkgs/ overlay
-              # and a darwin build; opencode/dsh stay on the NixOS hosts).
+              # darwin) and `ai` (its repo-local dsh needs a darwin build; dsh
+              # stays on the NixOS hosts — opencode is no longer in the group
+              # and reaches the Mac through common/home.nix instead).
               forPlatform = builtins.filter
                 (p: lib.meta.availableOn pkgs.stdenv.hostPlatform p);
               cliPackages = forPlatform
