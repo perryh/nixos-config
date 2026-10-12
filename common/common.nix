@@ -177,6 +177,12 @@ in
     # Keyed to the group like the other side effects, so headless hosts
     # (which drop graphics) don't pull in sane-backends.
     hardware.sane.enable = lib.elem "graphics" anyEnabledGroups;
+    # Brother's prebuilt brscan drivers (brscan4 = older models, brscan5 =
+    # newer) plus driverless eSCL/WSD network scanning (sane-airscan) —
+    # covers most modern MFPs even without a vendor driver.
+    hardware.sane.extraBackends = lib.optionals
+      (lib.elem "graphics" anyEnabledGroups)
+      (with pkgs; [ sane-airscan brscan4 brscan5 ]);
 
     # zsh is perryh's login shell (users.users.perryh.shell); the NixOS
     # programs.zsh module provides /etc/zshenv|zprofile|zshrc and registers
