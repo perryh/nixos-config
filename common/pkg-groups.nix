@@ -102,6 +102,8 @@
     darktable
     digikam    # photo library manager; SD-card ingest + Google Photos export
     imagemagick
+    kdePackages.marble
+    kdePackages.skanpage
   ];
   media = with pkgs; [
     ffmpeg
@@ -110,6 +112,7 @@
     ffmpegthumbnailer
     vlc
     yt-dlp
+    kdePackages.kdenlive
   ];
   office = with pkgs; [
     libreoffice
