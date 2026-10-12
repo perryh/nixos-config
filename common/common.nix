@@ -173,6 +173,10 @@ in
     # --- shared services ---
     services.openssh.enable = true;
     services.printing.enable = true;
+    # Scanner backends + udev rules — makes skanpage (graphics group) work.
+    # Keyed to the group like the other side effects, so headless hosts
+    # (which drop graphics) don't pull in sane-backends.
+    hardware.sane.enable = lib.elem "graphics" anyEnabledGroups;
 
     # zsh is perryh's login shell (users.users.perryh.shell); the NixOS
     # programs.zsh module provides /etc/zshenv|zprofile|zshrc and registers
