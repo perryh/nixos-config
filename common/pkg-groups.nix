@@ -113,7 +113,7 @@
   ];
   office = with pkgs; [
     libreoffice
-    kdePackages.kcalc  # KDE calculator; only exposed as kdePackages.kcalc (no top-level `kcalc` attr)
+    kdePackages.kcalc
   ];
   # GUI developer tools — desktop hosts only. Best tracked via
   # perry.unstableGroups: VS Code releases monthly and the stable 26.05
