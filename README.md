@@ -23,8 +23,12 @@ machine to machine; per-host files hold hostname + hardware specifics.
   default is all of them. Headless servers drop the GUI groups (see below).
   `ai` (herdr) is nixpkgs-unstable-only — it must be in
   `perry.unstableGroups`, not the stable set.
+  The only packages outside the groups: `kdePackages.kate` (per-user via
+  `users.users.perryh.packages` in `common/common.nix`) and the home-manager
+  user packages in `common/home.nix`.
 - `common/home.nix` — shared user config via home-manager (zsh, git identity,
-  ripgrep/fzf/eza, and the per-user agent CLIs `omp` + `opencode` 2).
+  ripgrep/fzf/eza, and the per-user agent CLIs `omp` + `opencode` 2 +
+  `herdr`).
 - `pkgs/` — repo-local derivations of packages not in nixpkgs (currently
   `dsh`, built from its published npm tarball, and `opencode`, OpenCode 2 from
   upstream's published binaries). Pattern: an overlay in
@@ -53,9 +57,9 @@ Groups (safe on any host — including headless servers and the Mac):
 | group        | packages                                                     |
 |--------------|--------------------------------------------------------------|
 | `core`       | gh, neovim, vim, curl, jq                                    |
-| `dev`        | git, dust, fd, pnpm, shellcheck, tree                        |
+| `dev`        | git, dust, fd, pnpm, shellcheck, tree, zola                  |
 | `net`        | whois, net-tools, iputils, bind.dnsutils, mtr, netcat, nmap, iperf3, tcpdump |
-| `langs`      | go, python3, ruby, rustc, cargo, nodejs                      |
+| `langs`      | go_latest, python3, ruby, rustc, cargo, nodejs_24            |
 | `ai`         | herdr (unstable-only), dsh (repo-local)                      |
 | `containers` | docker                                                       |
 | `tools`      | p7zip, ethtool, gptfdisk, parted, testdisk, udisks, unzip    |
@@ -66,9 +70,9 @@ Desktop-only (omit on headless hosts):
 | group        | packages                                            |
 |--------------|-----------------------------------------------------|
 | `browsers`   | firefox, brave, google-chrome                       |
-| `graphics`   | gimp, darktable, digikam, imagemagick               |
-| `media`      | ffmpeg, mediainfo, mpv, ffmpegthumbnailer, vlc, yt-dlp |
-| `office`     | libreoffice                                         |
+| `graphics`   | gimp, darktable, digikam, imagemagick, kdePackages.marble, kdePackages.skanpage |
+| `media`      | ffmpeg, mediainfo, mpv, ffmpegthumbnailer, vlc, yt-dlp, kdePackages.kdenlive |
+| `office`     | libreoffice, kdePackages.kcalc                      |
 | `dev-gui`    | vscode-fhs                                          |
 | `remote`     | rustdesk-flutter                                    |
 | `terminals`  | ghostty                                             |
@@ -84,8 +88,8 @@ instead of the stable pin, while the OS and everything else stay on the
 release branch:
 
 ```nix
-# hosts/<name>.nix
-perry.unstableGroups = [ "browsers" "terminals" "chat" "ai" ];
+# hosts/<name>.nix — the list both hosts currently track
+perry.unstableGroups = [ "browsers" "terminals" "chat" "ai" "langs" "dev-gui" "remote" "dev" ];
 ```
 
 The group is then installed exactly once, from unstable (its stable copy is
@@ -108,12 +112,12 @@ home-manager switch --flake ~/git/nixos-config#perry-mac
 Which groups the Mac gets is set in the `homeConfigurations.perry-mac` module
 in `flake.nix`: `cliGroups` comes from the stable pin, `cliUnstableGroups`
 from `nixpkgs-unstable`, and both expand the same `common/pkg-groups.nix`
-definitions the NixOS hosts use. Currently `core dev net tools backup` +
-`langs`, so the Mac has `gh`, `git`, `neovim`, `jq`, `restic`, the language
-toolchains and the network tooling. Each group keeps the source the NixOS
-hosts take it from, so versions stay identical machine to machine; groups the
-hosts track from unstable need to be listed in `cliUnstableGroups` to stay in
-step.
+definitions the NixOS hosts use. Currently `core net tools backup` (stable) +
+`langs dev` (unstable), so the Mac has `gh`, `git`, `neovim`, `jq`, `restic`,
+the language toolchains, the dev CLIs and the network tooling. Each group
+keeps the source the NixOS hosts take it from, so versions stay identical
+machine to machine; groups the hosts track from unstable need to be listed in
+`cliUnstableGroups` to stay in step.
 
 Members nixpkgs marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`)
 are filtered out automatically. The GUI groups stay Linux-only, and
