@@ -20,7 +20,7 @@
 final: prev: {
   dsh = prev.buildNpmPackage {
     pname = "dsh";
-    version = "0.1.5-rc.1";
+    version = "0.2.1-rc.2";
 
     src = prev.lib.cleanSource ./.;
 
@@ -39,7 +39,7 @@ final: prev: {
       grep -q -- '--expose-internals' $out/bin/dsh
     '';
 
-    npmDepsHash = "sha256-n/OQHKJxL5lKmmgyXvgefLkFW2v5/QlqK6DOv1ozaD8=";
+    npmDepsHash = "sha256-kAKS6X2SZbTLtpLg21gfqZuh4HBEyafxHRX6mj/NMU4=";
 
     meta = {
       description = "DeepSeek Harness (dsh) — open-source agent harness; everything is a plugin";
