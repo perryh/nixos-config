@@ -128,7 +128,13 @@ No CI, no test suite, no linter — nix parse/eval is the check.
 - `perry.unstableGroups` (same group names) takes groups from the rolling
   `nixpkgs-unstable` input (pinned in `flake.lock`); they're removed from the
   stable set and installed exactly once. Both hosts currently track
-  `[ "browsers" "terminals" "chat" "ai" "langs" "dev-gui" "remote" ]`.
+  `[ "terminals" "chat" "ai" "langs" "dev-gui" "remote" "dev" ]`.
+- `browsers` stays on the stable pin on purpose: Brave's bundled Qt shim
+  (theme/file dialogs) resolves platform plugins through the session's
+  `QT_PLUGIN_PATH`, so it must link the same Qt as Plasma. Unstable's Brave
+  links Qt 6.12 while 26.05's Plasma exports Qt 6.11 plugins, and the shim
+  aborts at startup ("Could not load the Qt platform plugin"). Only move
+  `browsers` back to unstable once both Qts match again.
 - `herdr` (in the `ai` group, with repo-local dsh) exists ONLY in
   unstable — hosts on the all-groups default must list it in
   `perry.unstableGroups` (both do); selecting it from the stable set throws a

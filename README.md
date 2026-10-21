@@ -89,12 +89,19 @@ release branch:
 
 ```nix
 # hosts/<name>.nix — the list both hosts currently track
-perry.unstableGroups = [ "browsers" "terminals" "chat" "ai" "langs" "dev-gui" "remote" "dev" ];
+perry.unstableGroups = [ "terminals" "chat" "ai" "langs" "dev-gui" "remote" "dev" ];
 ```
 
 The group is then installed exactly once, from unstable (its stable copy is
 dropped). Refresh those apps with `nix flake update nixpkgs-unstable` +
 rebuild; remove a group from the list to return it to the stable pin.
+
+`browsers` is intentionally kept on the stable pin: Brave's Qt shim loads the
+session's Qt plugins from `QT_PLUGIN_PATH`, so it must be built against the
+same Qt as Plasma — unstable's Brave (Qt 6.12) aborts at startup against
+26.05's Plasma (Qt 6.11). Browsers refresh with the OS via
+`nix flake lock --update-input nixpkgs`.
+
 Note the `ai` group (herdr) exists only in unstable — hosts that don't list
 it in `perry.unstableGroups` get a clear error if the stable set includes it.
 

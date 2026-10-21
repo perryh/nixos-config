@@ -4,8 +4,11 @@
 
   # Desktop GUI apps, language toolchains (and herdr, which only exists in
   # unstable) track nixpkgs-unstable for the latest versions; the OS and
-  # everything else stay on the stable 26.05 pin.
-  perry.unstableGroups = [ "browsers" "terminals" "chat" "ai" "langs" "dev-gui" "remote" "dev" ];
+  # everything else stay on the stable 26.05 pin. `browsers` deliberately
+  # stays on the stable pin: Brave's Qt shim loads the session's Qt plugins
+  # from QT_PLUGIN_PATH, so it must be built against the same Qt as Plasma
+  # (unstable's Brave links Qt 6.12 and aborts on 26.05's Qt 6.11).
+  perry.unstableGroups = [ "terminals" "chat" "ai" "langs" "dev-gui" "remote" "dev" ];
 
   # --- boot loader: systemd-boot (matches the installer's UEFI setup) ---
   boot.loader.systemd-boot.enable = true;
