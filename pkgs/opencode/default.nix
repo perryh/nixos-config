@@ -36,25 +36,25 @@ final: prev:
 let
   inherit (prev) lib;
 
-  version = "2.0.24";
+  version = "2.1.2";
 
   # npm platform package name + SRI hash of its tarball, per system.
   targets = {
     x86_64-linux = {
       npmPlatform = "linux-x64";
-      hash = "sha256-IbHuBoOEFAXWlUH8REgfjldS6Vvqcui47DHbzbEC5/g=";
+      hash = "sha256-LhxmX16C5TFzIynyoxBmcoc0d1BuN4sX0w7qvTHRObM=";
     };
     aarch64-linux = {
       npmPlatform = "linux-arm64";
-      hash = "sha256-nQzSv8Bg/Wwq/fbbaYN/hpDUao2DJ7uGRCGFHOAE9FM=";
+      hash = "sha256-1U46ltnjK2/xJ4NpJe2aOTJU0OceDffrjMoqqWLJvfE=";
     };
     aarch64-darwin = {
       npmPlatform = "darwin-arm64";
-      hash = "sha256-fwPN/ZC/DORdSmbxvtfnZ+I7VGetGTqEVefG+7HquaE=";
+      hash = "sha256-iOX6jY4pNUMINQxe14QuI/Y8C05FlM2PkbDKAGt9oiQ=";
     };
     x86_64-darwin = {
       npmPlatform = "darwin-x64";
-      hash = "sha256-DJExlBPkfoP1D894GHjtFEspcr2JAe75L9qRQYAMTog=";
+      hash = "sha256-bIY22qAYZC2LK0LWktmgGubvxXNG5NqsSvfOmKbXYRo=";
     };
   };
 
