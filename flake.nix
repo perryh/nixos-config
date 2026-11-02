@@ -6,15 +6,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     # Rolling nixpkgs. Used ONLY for groups listed in perry.unstableGroups
-    # (see common/common.nix) — never for the OS itself.
+    # (see common/common.nix) — never for the OS itself — plus the per-user
+    # home.nix packages that are unstable-only or want a newer build than the
+    # stable pin (omp, herdr, opencode).
     #
-    # Tracks the rolling branch. Was temporarily pinned to a 2026-09-10 rev
-    # (b1822af: opencode 1.18.29 + bun 1.3.13) because rolling had bumped bun
-    # to 1.4.2 and opencode's then-source-built derivation crashed on it
-    # (github.com/anomalyco/opencode/issues/48372), fixed in opencode 1.18.31 —
-    # moot for this repo now: opencode no longer comes from nixpkgs at all
-    # (repo-local pkgs/opencode installs OpenCode 2 from upstream's prebuilt
-    # binaries, neither set's bun involved).
+    # Tracks the rolling branch (no pin needed: opencode comes from here and is
+    # itself built from source in nixpkgs, so its bun is whatever unstable
+    # pairs it with).
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
@@ -45,7 +43,6 @@
             config.allowUnfree = true;
             overlays = [
               (import ./pkgs/dsh)
-              (import ./pkgs/opencode)
             ];
           };
         };
@@ -62,17 +59,15 @@
     nixosConfigurations."perry-office" = mkHost "perry-office";
     # Mac (standalone home-manager, no NixOS host): reuses common/home.nix
     # verbatim — same home packages, omp settings + models, zsh, git identity.
-    # The same nixpkgs-unstable pin is imported for darwin, so programs.omp
-    # and the home herdr resolve to the identical version as the Linux hosts.
-    # Apple Silicon — for an Intel Mac, switch both systems to x86_64-darwin.
-    # The pkgs/opencode overlay is applied here too: common/home.nix installs
-    # programs.opencode from it (the prebuilt darwin-arm64 binary). dsh is not
-    # — it stays in the Linux-only "ai" group.
+    # The same nixpkgs-unstable pin is imported for darwin, so programs.omp,
+    # programs.opencode and the home herdr resolve to the identical version as
+    # the Linux hosts. Apple Silicon — for an Intel Mac, switch both systems to
+    # x86_64-darwin. No repo-local overlays here: dsh stays in the Linux-only
+    # "ai" group.
     homeConfigurations.perry-mac =
       home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
           system = "aarch64-darwin";
-          overlays = [ (import ./pkgs/opencode) ];
         };
         extraSpecialArgs = {
           unstablePkgs = import nixpkgs-unstable { system = "aarch64-darwin"; };

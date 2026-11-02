@@ -57,8 +57,7 @@
   # this group from the stable set errors on purpose.
   # (omp and opencode moved out of this group entirely: both are installed
   # per-user by home-manager — programs.omp / programs.opencode in
-  # common/home.nix — so the Mac gets them too. opencode's package is the
-  # repo-local pkgs/opencode overlay, which carries OpenCode 2.)
+  # common/home.nix, from the nixpkgs-unstable pin — so the Mac gets them too.)
   # dsh (DeepSeek Harness) is repo-local (pkgs/dsh, not in any nixpkgs) and
   # available from both sets via the pkgs/ overlay.
   ai = [

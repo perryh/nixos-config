@@ -59,17 +59,18 @@
     };
   };
 
-  # OpenCode 2 CLI (opencode.ai). Moved here from the system "ai" group (which
-  # is Linux-only) so the Mac gets it too; the package is the repo-local
-  # pkgs/opencode overlay (upstream's v2 prebuilt binaries — see that file).
+  # OpenCode 2 CLI (opencode.ai). Installed per-user here (not in the system
+  # "ai" group, which is Linux-only) so the Mac gets it too. The package comes
+  # from the same nixpkgs-unstable pin as omp/herdr — nixpkgs now carries
+  # opencode v2, so no repo-local overlay is needed; its wrapper also sets
+  # OPENCODE_DISABLE_AUTOUPDATE, so the version is whatever that pin holds.
   # No settings here on purpose: the module writes ~/.config/opencode/
   # opencode.json + tui.json only when programs.opencode.settings/tui are set,
   # and this machine's opencode.json is hand-written (plugins, providers, TUI
-  # session script). Autoupdate is off inside the package wrapper, so the
-  # version is whichever pkgs/opencode pins.
+  # session script).
   programs.opencode = {
     enable = true;
-    package = pkgs.opencode;
+    package = unstablePkgs.opencode;
   };
 
   # Custom OMP models live in models.yml, separately from config.yml.

@@ -36,7 +36,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   from unstable exactly once.
 - `common/home.nix` — shared home-manager user config: git identity, zsh +
   oh-my-zsh, `programs.omp` settings, `programs.opencode` (binary only, from
-  the repo-local `pkgs/opencode` overlay), the custom GGPC provider rendered
+  `nixpkgs-unstable`), the custom GGPC provider rendered
   into `~/.omp/agent/models.yml` by `home.file`, and the per-user
   `unstablePkgs.herdr`.
 - omp (oh-my-pi, omp.sh) is NOT a package group: it is installed per-user via
@@ -46,18 +46,18 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   so edits made inside omp are lost on the next switch — same for
   `models.yml`; change settings in `common/home.nix` instead.
 - OpenCode 2 (opencode.ai) is installed the same way: `programs.opencode` in
-  `common/home.nix`, package from the repo-local `pkgs/opencode` overlay (the
-  locked stable 26.05 pin carries opencode 1.15.10 and rolling 1.18.x, so v2
-  is packaged there from upstream's published npm binaries; version + hashes
-  are pinned in that file, and autoupdate is disabled in its wrapper). No
+  `common/home.nix`, package `unstablePkgs.opencode` — nixpkgs now carries
+  opencode v2 (source-built with nixpkgs' own bun), so there is no repo-local
+  package anymore; its wrapper sets `OPENCODE_DISABLE_AUTOUPDATE`, so the
+  version is whatever the `nixpkgs-unstable` pin holds (2.2.1 at the current
+  lock; refresh with `nix flake update nixpkgs-unstable`). No
   `programs.opencode.settings`: the module only writes `~/.config/opencode/
   opencode.json` + `tui.json` when those options are set, and this machine's
   files are hand-written.
-- `pkgs/` — repo-local overlays of packages not in nixpkgs: `dsh`
+- `pkgs/` — repo-local overlays of packages not in nixpkgs: only `dsh`
   (a `buildNpmPackage` from the published npm tarball: prebuilt `lib/`, a
-  committed lockfile) and `opencode` (OpenCode 2: `fetchurl` of upstream's
-  per-platform npm binary, patchelf'd for NixOS). Refresh recipes live in each
-  `default.nix`. Overlays must be applied to BOTH pkgs sets: stable via
+  committed lockfile). Its refresh recipe lives in its `default.nix`. Overlays
+  must be applied to BOTH pkgs sets: stable via
   `nixpkgs.overlays` in common.nix, unstable via `overlays` in the flake.nix
   `unstablePkgs` import.
 - `hosts/<name>.nix` — per-host: hostname, `perry.unstableGroups`, loader,
@@ -87,8 +87,9 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   hand-kept darwin subset — verified against the locked pin. Excluded on
   purpose: `containers` (no docker daemon on darwin) and `ai` (repo-local
   `dsh` needs a darwin build; `omp`, `opencode` + `herdr` already reach the Mac
-  through `common/home.nix`). The Mac's pkgs import applies the `pkgs/opencode`
-  overlay for the same reason the hosts do — `home.nix` installs it there.
+  through `common/home.nix`, all from the unstable pin). The Mac's pkgs import
+  therefore needs no repo-local overlay — `pkgs/` is only `dsh`, which stays
+  Linux-only.
 - Deploy: `home-manager switch --flake ~/git/nixos-config#perry-mac`.
 - Verify from either Linux host (darwin configs evaluate fine there; they
   just can't build): `nix eval
@@ -152,7 +153,8 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `patchelf --set-interpreter/--set-rpath` to the nix loader (NixOS has no
   `/lib64/ld-linux-*.so.2`). Never `runCommand` a binary you must patch — and
   never run a fetched bun/bundled executable through the loader by hand
-  instead: `pkgs/opencode` documents why (the CLI re-executes itself).
+  instead: such a CLI re-executes itself, so the child execvp's the unpached
+  file and dies with "error while loading shared libraries".
 - `perryh`'s `openssh.authorizedKeys` mirror `github.com/perryh.keys` — keep
   in sync when keys change there.
 - Secrets only in gitignored `*.local.nix` / `local/` (the repo is public).

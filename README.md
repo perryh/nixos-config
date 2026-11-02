@@ -30,8 +30,7 @@ machine to machine; per-host files hold hostname + hardware specifics.
   ripgrep/fzf/eza, and the per-user agent CLIs `omp` + `opencode` 2 +
   `herdr`).
 - `pkgs/` — repo-local derivations of packages not in nixpkgs (currently
-  `dsh`, built from its published npm tarball, and `opencode`, OpenCode 2 from
-  upstream's published binaries). Pattern: an overlay in
+  only `dsh`, built from its published npm tarball). Pattern: an overlay in
   `pkgs/<name>/default.nix` added to `nixpkgs.overlays` in
   `common/common.nix` (and to the flake's pkgs imports), referenced by name in
   a group or in `common/home.nix`.
@@ -159,8 +158,7 @@ single source of truth.
 When a package isn't in nixpkgs at all, add a repo-local derivation under
 `pkgs/<name>/default.nix` as an overlay (wired into `nixpkgs.overlays` in
 `common/common.nix` and the flake's pkgs imports, referenced by name in a group
-or in `common/home.nix`). Today: `dsh`, the DeepSeek Harness CLI, built with
-`buildNpmPackage` from the published npm tarball; and `opencode`, OpenCode 2
-built from upstream's published per-platform npm binaries (`fetchurl` + one SRI
-hash per system, patchelf'd to the nix loader — refresh recipes in each
-`default.nix`).
+or in `common/home.nix`). Today: only `dsh`, the DeepSeek Harness CLI, built
+with `buildNpmPackage` from the published npm tarball (refresh recipe in its
+`default.nix`). `omp`, `opencode` and `herdr` are no longer repo-local — they
+come straight from the `nixpkgs-unstable` pin.
