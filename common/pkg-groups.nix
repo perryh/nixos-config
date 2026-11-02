@@ -116,6 +116,11 @@
   office = with pkgs; [
     libreoffice
     kdePackages.kcalc
+    # Not a document app, but it lives here deliberately: the `chat` group is
+    # unstable-tracked on both hosts, and zoom is wanted from the stable 26.05
+    # pin (same Qt as Plasma, like `browsers`). Move it to `chat` if it should
+    # follow the rolling set instead.
+    zoom-us
   ];
   # GUI developer tools — desktop hosts only. Best tracked via
   # perry.unstableGroups: VS Code releases monthly and the stable 26.05
