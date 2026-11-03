@@ -53,6 +53,11 @@
     nodejs_24  # latest Node LTS (nodejs_26 is current non-LTS until ~Oct 2026)
     gcc    # GCC wrapper: provides `cc`, `gcc`, `g++` (+ binutils, libc headers)
     clang  # LLVM C/C++ compiler — a second toolchain, and `clangd`'s basis
+    gnumake     # the `make` binary (this pin has no top-level `make` attr)
+    cmake       # configure/generate step for most C and C++ projects
+    ninja       # cmake's fast default backend
+    pkg-config  # .pc lookups for -l/-I flags
+    gdb         # debugger for the C/C++ toolchain (inert on the Mac: use lldb)
   ];
   # herdr (AI coding-agent multiplexer) is only in nixpkgs-unstable, not the
   # stable 26.05 pin — track it via perry.unstableGroups = [ "ai" ]. Selecting

@@ -58,7 +58,7 @@ Groups (safe on any host — including headless servers and the Mac):
 | `core`       | gh, neovim, vim, curl, jq                                    |
 | `dev`        | git, dust, fd, pnpm, shellcheck, tree, zola                  |
 | `net`        | whois, net-tools, iputils, bind.dnsutils, mtr, netcat, nmap, iperf3, tcpdump |
-| `langs`      | go_latest, python3, ruby, rustc, cargo, nodejs_24, gcc, clang |
+| `langs`      | go_latest, python3, ruby, rustc, cargo, nodejs_24, gcc, clang, gnumake, cmake, ninja, pkg-config, gdb |
 | `ai`         | herdr (unstable-only), dsh (repo-local)                      |
 | `containers` | docker                                                       |
 | `tools`      | p7zip, ethtool, gptfdisk, parted, testdisk, udisks, unzip    |
