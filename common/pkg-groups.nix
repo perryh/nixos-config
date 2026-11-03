@@ -51,6 +51,8 @@
     rustc  # (top-level `rust` is the platform attrset, not a package)
     cargo
     nodejs_24  # latest Node LTS (nodejs_26 is current non-LTS until ~Oct 2026)
+    gcc    # GCC wrapper: provides `cc`, `gcc`, `g++` (+ binutils, libc headers)
+    clang  # LLVM C/C++ compiler — a second toolchain, and `clangd`'s basis
   ];
   # herdr (AI coding-agent multiplexer) is only in nixpkgs-unstable, not the
   # stable 26.05 pin — track it via perry.unstableGroups = [ "ai" ]. Selecting
