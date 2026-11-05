@@ -132,6 +132,14 @@ in {
 
   programs.git = {
     enable = true;
+    # Same build as the `dev` group (git lives there), which BOTH hosts track
+    # from nixpkgs-unstable. On the Mac the group and this module land in the
+    # same home-manager buildEnv, so mixing the stable pin's git (2.54.0) with
+    # unstable's (2.56.0) fails with "two given paths contain a conflicting
+    # subpath: .../bin/git-jump". Keeping one source also means `git --version`
+    # matches on every machine. If `dev` ever goes back to the stable set,
+    # change this (and the Mac's cliUnstableGroups) together.
+    package = unstablePkgs.git;
     # home-manager manages ~/.config/git/config (a symlink into the store),
     # so `git config --global` can't write it — declare identity here instead.
     # Shared, so every machine commits with the same identity.
