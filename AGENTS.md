@@ -173,6 +173,13 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   (plain `git`).
 - `dockerTools` is a helper attrset, not a package — adding it to
   `environment.systemPackages` fails with "not of type `package`".
+- `langs` carries **clang only**, on purpose: gcc-wrapper and clang-wrapper
+  both ship `bin/cc` + `bin/c++`, which NixOS hides (`system-path` sets
+  `ignoreCollisions`) but home-manager's `pkgs.buildEnv` profile rejects
+  (exit 25, "two given paths contain a conflicting subpath") — that is what
+  broke `home-manager switch` on perry-mac. Don't add gcc back; scripts/
+  Makefiles that hardcode `gcc` need `CC=clang CXX=clang++` (clang still
+  compiles C++ against libstdc++ by default).
 - home-manager symlinks `~/.config/*` into the read-only store — manual writes
   (e.g. `git config --global`) fail EROFS; set the value in home.nix, rebuild.
 - Passwords never in the repo (it is public): `users.mutableUsers` (default)

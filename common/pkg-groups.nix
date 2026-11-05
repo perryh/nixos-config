@@ -51,8 +51,13 @@
     rustc  # (top-level `rust` is the platform attrset, not a package)
     cargo
     nodejs_24  # latest Node LTS (nodejs_26 is current non-LTS until ~Oct 2026)
-    gcc    # GCC wrapper: provides `cc`, `gcc`, `g++` (+ binutils, libc headers)
-    clang  # LLVM C/C++ compiler — a second toolchain, and `clangd`'s basis
+    # One C/C++ toolchain, deliberately: gcc-wrapper and clang-wrapper both
+    # ship bin/cc + bin/c++, which NixOS hides (system-path sets
+    # ignoreCollisions) but home-manager's pkgs.buildEnv profile rejects, so
+    # having both breaks the Mac. scripts/Makefiles that hardcode `gcc` need
+    # CC=clang CXX=clang++. `clang` provides cc/c++/clang/clang++ and still
+    # compiles C++ against libstdc++ by default.
+    clang  # LLVM C/C++ compiler — the sole C/C++ toolchain, and `clangd`'s basis
     gnumake     # the `make` binary (this pin has no top-level `make` attr)
     cmake       # configure/generate step for most C and C++ projects
     ninja       # cmake's fast default backend
