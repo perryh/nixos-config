@@ -1,7 +1,26 @@
 # Shared user/home config (home-manager) — identical on every host.
 # Host-specific user tweaks belong in hosts/<name>.nix under
 # home-manager.users.perryh = { ... }.
-{ pkgs, unstablePkgs, ... }: {
+{ pkgs, unstablePkgs, ... }:
+let
+  # TEMPORARY: nixpkgs-unstable still pins the pre-fix node_modules hash for
+  # opencode 2.2.5, so the FOD fails with
+  #   specified: sha256-xfOVcw1+waLVNhFDwzOtzxrUSQEogvn88YomydOlhwc=
+  #   got:       sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=
+  # Upstream fixed it on master (c399e1b7 "opencode: fix hash", which also
+  # split the hash per platform) but that commit is not in the
+  # nixpkgs-unstable branch yet. Drop this override once
+  # `nix flake update nixpkgs-unstable` carries it: the override builds the
+  # identical derivation the fixed nixpkgs will, so nothing is rebuilt.
+  opencode = unstablePkgs.opencode.overrideAttrs (prev: {
+    node_modules = prev.node_modules.overrideAttrs (_: {
+      outputHash =
+        if pkgs.stdenv.hostPlatform.isDarwin
+        then "sha256-dIveiaiPFGSItwLyeMuPDxTE9gpvvnlTCB/+nG24qCc="
+        else "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
+    });
+  });
+in {
   home.stateVersion = "26.05";
 
   home.packages = (with pkgs; [
@@ -70,7 +89,7 @@
   # session script).
   programs.opencode = {
     enable = true;
-    package = unstablePkgs.opencode;
+    package = opencode;
   };
 
   # Custom OMP models live in models.yml, separately from config.yml.
