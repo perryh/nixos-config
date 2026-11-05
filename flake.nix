@@ -34,16 +34,11 @@
         specialArgs = {
           inherit omp;
           # Package set for perry.unstableGroups: rolling branch, unfree
-          # allowed (browsers/chat have unfree apps). pkgs/ holds repo-local
-          # overlays for packages not in nixpkgs; they must be applied to BOTH
-          # sets so groups can reference them from either source (both
-          # overlays are version-pinned in-repo, so the two sets agree).
+          # allowed (browsers/chat have unfree apps). No repo-local overlays
+          # anymore (pkgs/ was removed with dsh).
           unstablePkgs = import nixpkgs-unstable {
             system = "x86_64-linux";
             config.allowUnfree = true;
-            overlays = [
-              (import ./pkgs/dsh)
-            ];
           };
         };
         modules = [
@@ -62,8 +57,8 @@
     # The same nixpkgs-unstable pin is imported for darwin, so programs.omp,
     # programs.opencode and the home herdr resolve to the identical version as
     # the Linux hosts. Apple Silicon — for an Intel Mac, switch both systems to
-    # x86_64-darwin. No repo-local overlays here: dsh stays in the Linux-only
-    # "ai" group.
+    # x86_64-darwin. Groups are expanded from common/pkg-groups.nix, so no
+    # repo-local packages are needed here.
     homeConfigurations.perry-mac =
       home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
@@ -99,9 +94,8 @@
               # Drop what nixpkgs marks Linux-only (iputils, ethtool, parted,
               # udisks) instead of hand-maintaining a darwin subset. Excluded
               # on purpose: `containers` (docker daemon does not apply on
-              # darwin) and `ai` (its repo-local dsh needs a darwin build; dsh
-              # stays on the NixOS hosts — opencode is no longer in the group
-              # and reaches the Mac through common/home.nix instead).
+              # darwin) and `ai` (herdr is the only member and reaches the Mac
+              # through common/home.nix instead).
               forPlatform = builtins.filter
                 (p: lib.meta.availableOn pkgs.stdenv.hostPlatform p);
               cliPackages = forPlatform

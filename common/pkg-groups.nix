@@ -64,14 +64,12 @@
   # this group from the stable set errors on purpose.
   # (omp and opencode moved out of this group entirely: both are installed
   # per-user by home-manager — programs.omp / programs.opencode in
-  # common/home.nix, from the nixpkgs-unstable pin — so the Mac gets them too.)
-  # dsh (DeepSeek Harness) is repo-local (pkgs/dsh, not in any nixpkgs) and
-  # available from both sets via the pkgs/ overlay.
+  # common/home.nix, from the nixpkgs-unstable pin — so the Mac gets them too.
+  # dsh was removed along with the repo-local pkgs/ overlay.)
   ai = [
     (pkgs.herdr or (throw (
       "herdr is only in nixpkgs-unstable — add \"ai\" to perry.unstableGroups"
     )))
-    pkgs.dsh
   ];
   # (dockerTools is a helper attrset — pullImage/buildImage functions — not a
   # package; the client itself is just `docker`. Use dockerTools.pullImage or

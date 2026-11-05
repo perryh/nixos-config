@@ -15,16 +15,15 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   (follows the nixpkgs input), the `omp` flake (module only — see
   `common/home.nix`), and `nixpkgs-unstable` (rolling branch, used ONLY for
   `perry.unstableGroups` — never for the OS). `mkHost "<name>"` wires common +
-  host + hardware and passes `unstablePkgs` (unstable + `allowUnfree` + the
-  `pkgs/` overlays) through `specialArgs`. `homeConfigurations.perry-mac` is
+  host + hardware and passes `unstablePkgs` (unstable + `allowUnfree`) through
+  `specialArgs`. `homeConfigurations.perry-mac` is
   the darwin entry point, with its own darwin pkgs imports + home-manager CLI,
   and its own group selection (see Mac below).
 - `common/common.nix` — shared users, services, desktop stack (Plasma 6/sddm),
   home-manager wiring, and the `perry.systemGroups` / `perry.unstableGroups`
-  options. Applies the `pkgs/` overlay to the stable set, and wires the
-  group-keyed side effects: `containers` → docker daemon + docker group,
-  `browsers` → firefox module (package follows the group's source),
-  `backup` → `services.restic.backups`.
+  options. Wires the group-keyed side effects: `containers` → docker daemon +
+  docker group, `browsers` → firefox module (package follows the group's
+  source), `backup` → `services.restic.backups`.
 - `common/pkg-groups.nix` — the named groups. Headless-safe: `core`
   (gh/neovim/vim/curl/jq), `dev`, `net`, `langs`, `ai`, `containers`,
   `tools`, `backup`. Desktop-only: `browsers`, `graphics`, `media`, `office`,
@@ -49,17 +48,17 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `common/home.nix`, package `unstablePkgs.opencode` — nixpkgs now carries
   opencode v2 (source-built with nixpkgs' own bun), so there is no repo-local
   package anymore; its wrapper sets `OPENCODE_DISABLE_AUTOUPDATE`, so the
-  version is whatever the `nixpkgs-unstable` pin holds (2.2.1 at the current
+  version is whatever the `nixpkgs-unstable` pin holds (2.2.5 at the current
   lock; refresh with `nix flake update nixpkgs-unstable`). No
   `programs.opencode.settings`: the module only writes `~/.config/opencode/
   opencode.json` + `tui.json` when those options are set, and this machine's
   files are hand-written.
-- `pkgs/` — repo-local overlays of packages not in nixpkgs: only `dsh`
-  (a `buildNpmPackage` from the published npm tarball: prebuilt `lib/`, a
-  committed lockfile). Its refresh recipe lives in its `default.nix`. Overlays
-  must be applied to BOTH pkgs sets: stable via
+- `pkgs/` — no longer exists: `dsh` (a `buildNpmPackage` from the published
+  npm tarball) was the only repo-local package and has been removed, so there
+  are no repo-local overlays in either pkgs set. To reintroduce one: put it at
+  `pkgs/<name>/default.nix`, apply it to BOTH pkgs sets — stable via
   `nixpkgs.overlays` in common.nix, unstable via `overlays` in the flake.nix
-  `unstablePkgs` import.
+  `unstablePkgs` import — then reference it by name in a group.
 - `hosts/<name>.nix` — per-host: hostname, `perry.unstableGroups`, loader,
   NFS mounts, laptop/desktop specifics (perry-office overrides the nvidia
   driver package).
@@ -85,11 +84,9 @@ No CI, no test suite, no linter — nix parse/eval is the check.
 - `lib.meta.availableOn pkgs.stdenv.hostPlatform` drops the members nixpkgs
   marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`) instead of a
   hand-kept darwin subset — verified against the locked pin. Excluded on
-  purpose: `containers` (no docker daemon on darwin) and `ai` (repo-local
-  `dsh` needs a darwin build; `omp`, `opencode` + `herdr` already reach the Mac
-  through `common/home.nix`, all from the unstable pin). The Mac's pkgs import
-  therefore needs no repo-local overlay — `pkgs/` is only `dsh`, which stays
-  Linux-only.
+  purpose: `containers` (no docker daemon on darwin) and `ai` (its only member,
+  `herdr`, reaches the Mac through `common/home.nix` from the unstable pin).
+  The Mac's pkgs imports therefore need no repo-local overlay.
 - Deploy: `home-manager switch --flake ~/git/nixos-config#perry-mac`.
 - Verify from either Linux host (darwin configs evaluate fine there; they
   just can't build): `nix eval
@@ -136,17 +133,17 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   links Qt 6.12 while 26.05's Plasma exports Qt 6.11 plugins, and the shim
   aborts at startup ("Could not load the Qt platform plugin"). Only move
   `browsers` back to unstable once both Qts match again.
-- `herdr` (in the `ai` group, with repo-local dsh) exists ONLY in
-  unstable — hosts on the all-groups default must list it in
-  `perry.unstableGroups` (both do); selecting it from the stable set throws a
-  clear error.
+- `herdr` (in the `ai` group) exists ONLY in unstable — hosts on the
+  all-groups default must list it in `perry.unstableGroups` (both do);
+  selecting it from the stable set throws a clear error.
 - Headless hosts set `perry.systemGroups = [ "core" "dev" "containers" ]`
   (default = all groups; `core` = gh/neovim/vim/curl/jq).
 - New host: copy `hosts/perry-eb*.nix` to the new name, add
   `nixosConfigurations."<name>" = mkHost "<name>";` (name quoted) in flake.nix.
 - Any module defining top-level `options` (like common.nix) must put every
   config attr under an explicit `config = { ... }`.
-- Prebuilt binaries in `pkgs/`: `fetchurl` + `mkDerivation` with the SRI hash
+- Prebuilt binaries in `pkgs/` (if reintroduced): `fetchurl` + `mkDerivation`
+  with the SRI hash
   per system (base64 of the raw sha256 bytes; `nix store prefetch-file` hashes
   any URL from any machine, so darwin hashes are checkable on Linux). A bare
   static executable needs no more; a glibc-dynamic one needs

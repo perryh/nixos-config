@@ -29,11 +29,12 @@ machine to machine; per-host files hold hostname + hardware specifics.
 - `common/home.nix` — shared user config via home-manager (zsh, git identity,
   ripgrep/fzf/eza, and the per-user agent CLIs `omp` + `opencode` 2 +
   `herdr`).
-- `pkgs/` — repo-local derivations of packages not in nixpkgs (currently
-  only `dsh`, built from its published npm tarball). Pattern: an overlay in
-  `pkgs/<name>/default.nix` added to `nixpkgs.overlays` in
-  `common/common.nix` (and to the flake's pkgs imports), referenced by name in
-  a group or in `common/home.nix`.
+- `pkgs/` — removed. There are no repo-local derivations anymore; `dsh` was
+  the last one and now comes from nowhere (uninstalled). If a package isn't in
+  nixpkgs again: add `pkgs/<name>/default.nix` as an overlay and wire it into
+  `nixpkgs.overlays` in `common/common.nix` (plus the flake's pkgs imports if
+  the unstable set needs it), then reference it by name in a group or in
+  `common/home.nix`.
 - `hosts/<name>.nix` — per-host: hostname, boot loader, laptop/desktop
   specifics, and `perry.systemGroups` for that machine.
 - `hosts/<name>-hardware.nix` — per-host boot/filesystem/disk. Regenerate with
@@ -59,7 +60,7 @@ Groups (safe on any host — including headless servers and the Mac):
 | `dev`        | git, dust, fd, pnpm, shellcheck, tree, zola                  |
 | `net`        | whois, net-tools, iputils, bind.dnsutils, mtr, netcat, nmap, iperf3, tcpdump |
 | `langs`      | go_latest, python3, ruby, rustc, cargo, nodejs_24, gcc, clang, gnumake, cmake, ninja, pkg-config, gdb |
-| `ai`         | herdr (unstable-only), dsh (repo-local)                      |
+| `ai`         | herdr (unstable-only)                                        |
 | `containers` | docker                                                       |
 | `tools`      | p7zip, ethtool, gptfdisk, parted, testdisk, udisks, unzip    |
 | `backup`     | restic                                                       |
@@ -127,9 +128,8 @@ machine to machine; groups the hosts track from unstable need to be listed in
 
 Members nixpkgs marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`)
 are filtered out automatically. The GUI groups stay Linux-only, and
-`containers` / `ai` are excluded on purpose (no docker daemon on darwin; the
-repo-local `dsh` would need a darwin build — `omp`, `opencode` and
-`herdr` already reach the Mac through `common/home.nix`).
+`containers` / `ai` are excluded on purpose (no docker daemon on darwin; `ai`'s
+only member, `herdr`, already reaches the Mac through `common/home.nix`).
 
 ## First boot on a machine
 
@@ -158,7 +158,6 @@ single source of truth.
 When a package isn't in nixpkgs at all, add a repo-local derivation under
 `pkgs/<name>/default.nix` as an overlay (wired into `nixpkgs.overlays` in
 `common/common.nix` and the flake's pkgs imports, referenced by name in a group
-or in `common/home.nix`). Today: only `dsh`, the DeepSeek Harness CLI, built
-with `buildNpmPackage` from the published npm tarball (refresh recipe in its
-`default.nix`). `omp`, `opencode` and `herdr` are no longer repo-local — they
-come straight from the `nixpkgs-unstable` pin.
+or in `common/home.nix`). There are none today: `dsh` was the last one and was
+removed. `omp`, `opencode` and `herdr` come straight from the
+`nixpkgs-unstable` pin.
