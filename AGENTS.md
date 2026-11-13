@@ -48,12 +48,11 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `common/home.nix`, package `unstablePkgs.opencode` — nixpkgs now carries
   opencode v2 (source-built with nixpkgs' own bun), so there is no repo-local
   package anymore; its wrapper sets `OPENCODE_DISABLE_AUTOUPDATE`, so the
-  version is whatever the `nixpkgs-unstable` pin holds (2.2.5 at the current
-  lock; refresh with `nix flake update nixpkgs-unstable`). Since commit
-  `ffb62e1` the package is wrapped in a **temporary `let` override** in
-  `common/home.nix` that rewrites the `opencode-node_modules` FOD hash
-  (per-platform: Linux `prx9dX7k…`, Darwin `dIveiai…`) — see the removal
-  trigger in Pitfalls. No
+  version is whatever the `nixpkgs-unstable` pin holds (2.2.6 at the current
+  lock; refresh with `nix flake update nixpkgs-unstable`). A temporary
+  `let` override that patched the `opencode-node_modules` FOD hash (commit
+  `ffb62e1`) was removed once the unstable pin carried nixpkgs' per-platform
+  `outputHash` fix (`c399e1b7`) — no override is needed now. No
   `programs.opencode.settings`: the module only writes `~/.config/opencode/
   opencode.json` + `tui.json` when those options are set, and this machine's
   files are hand-written.
@@ -189,20 +188,13 @@ No CI, no test suite, no linter — nix parse/eval is the check.
 - perry-office overrides `hardware.nvidia.package` with a `mkDriver` 595.99.02
   point release (stable 26.05's driver predates kernel 7.2); drop the override
   once 26.05 ships >= 595.99.02.
-- `common/home.nix`'s `opencode` override (added in `ffb62e1`) is TEMPORARY:
-  the `nixpkgs-unstable` pin predates nixpkgs master's `c399e1b7` "opencode:
-  fix hash", which re-hashed the `opencode-node_modules` FOD and split the hash
-  per platform. **When asked to update flake inputs: after
-  `nix flake update nixpkgs-unstable`, delete the `let ... opencode = ...`
-  override, set `programs.opencode.package` back to `unstablePkgs.opencode`,
-  and build it (`nix build --no-link
-  .#nixosConfigurations.perry-eb.config.home-manager.users.perryh.programs.opencode.package`).
-  Drop the override for good if that succeeds — a version bump makes the pinned
-  hashes stale anyway. Only restore it (with the build's new "got" hash per
-  platform) if the new pin still specifies
-  `sha256-xfOVcw1+waLVNhFDwzOtzxrUSQEogvn88YomydOlhwc=`.** Until then the
-  override is required, or the FOD fails with "hash mismatch ... specified:
-  xfOVcw1…".
+- `common/home.nix`'s `opencode` override was removed on 2026-11-12: the
+  `nixpkgs-unstable` pin now carries nixpkgs' `c399e1b7` "opencode: fix hash"
+  (per-platform `outputHash` for the `opencode-node_modules` FOD), and
+  `programs.opencode.package` is plain `unstablePkgs.opencode` (2.2.6) again.
+  If the FOD ever reports "hash mismatch ... specified: xfOVcw1…" after an
+  unstable bump, that is an upstream regression — re-add a `let` override with
+  the build's "got" hash per platform and note the removal trigger here.
 - "Git tree is dirty" warning after a rebuild is harmless (uncommitted
   flake.lock). `flake.lock` may end up root-owned after sudo rebuilds —
   regenerate in a `cp -r` of the repo under /tmp, then swap the file back.
