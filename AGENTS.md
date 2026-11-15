@@ -37,7 +37,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   oh-my-zsh, `programs.omp` settings, `programs.opencode` (binary only, from
   `nixpkgs-unstable`), the custom GGPC provider rendered
   into `~/.omp/agent/models.yml` by `home.file`, and the per-user
-  `unstablePkgs.herdr`.
+  `unstablePkgs.herdr` + `unstablePkgs.opencode-desktop`.
 - omp (oh-my-pi, omp.sh) is NOT a package group: it is installed per-user via
   home-manager — `programs.omp` in `common/home.nix`, package from
   `nixpkgs-unstable`, module from the `omp` flake input. `programs.omp.settings`
@@ -55,7 +55,11 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `outputHash` fix (`c399e1b7`) — no override is needed now. No
   `programs.opencode.settings`: the module only writes `~/.config/opencode/
   opencode.json` + `tui.json` when those options are set, and this machine's
-  files are hand-written.
+  files are hand-written. The desktop GUI client rides the same pin as a plain
+  `home.packages` entry, `unstablePkgs.opencode-desktop` (2.2.6 on unstable;
+  stable 26.05 only has 1.15.10, so it must not come from there) — it is a GUI
+  app, so it stays out of the system groups, and the darwin build exists, so
+  the Mac gets it too.
 - `pkgs/` — no longer exists: `dsh` (a `buildNpmPackage` from the published
   npm tarball) was the only repo-local package and has been removed, so there
   are no repo-local overlays in either pkgs set. To reintroduce one: put it at

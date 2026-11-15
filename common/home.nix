@@ -14,6 +14,13 @@
     # perry-eb the "ai" system group installs the identical store path too
     # (deduped, no double install); on the Mac this is the only install.
     unstablePkgs.herdr
+    # OpenCode 2 desktop GUI client — per-user next to the opencode CLI
+    # (programs.opencode below), from the same nixpkgs-unstable pin, so the
+    # GUI and CLI are always the same version. It is a GUI app, so it does not
+    # live in a system group (those are Linux-only on the Mac); the darwin
+    # build exists, so this covers every machine. Stable 26.05 only has
+    # 1.15.10 here, which would drift from the unstable CLI.
+    unstablePkgs.opencode-desktop
   ];
   # OMP coding agent (omp.sh). Moved here from the system "ai" group — the
   # package tracks the same nixpkgs-unstable pin it always did; the upstream
