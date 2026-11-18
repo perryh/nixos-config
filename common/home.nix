@@ -9,11 +9,6 @@
     fzf
     eza
   ]) ++ [
-    # herdr (AI coding-agent multiplexer) — per-user alongside omp, from the
-    # same nixpkgs-unstable pin (unstable-only, like omp's package). On
-    # perry-eb the "ai" system group installs the identical store path too
-    # (deduped, no double install); on the Mac this is the only install.
-    unstablePkgs.herdr
     # OpenCode 2 desktop GUI client — per-user next to the opencode CLI
     # (programs.opencode below), from the same nixpkgs-unstable pin, so the
     # GUI and CLI are always the same version. It is a GUI app, so it does not
@@ -23,16 +18,15 @@
     unstablePkgs.opencode-desktop
     # Expo Application Services CLI (eas build/submit/update). The stable
     # 26.05 pin is far behind (18.7.0 there vs 27.2.0 on unstable), so it
-    # rides the same nixpkgs-unstable pin as herdr/opencode. It is a plain
+    # rides the same nixpkgs-unstable pin as omp/opencode. It is a plain
     # Node CLI (no GUI), so per-user home.packages keeps one version on the
     # NixOS hosts and the Mac alike.
     unstablePkgs.eas-cli
   ];
-  # OMP coding agent (omp.sh). Moved here from the system "ai" group — the
-  # package tracks the same nixpkgs-unstable pin it always did; the upstream
-  # home-manager module owns the config. On every switch the declared
-  # settings are installed to ~/.omp/agent/config.yml as a writable copy
-  # (omp locks + rewrites the file at runtime), so runtime changes made
+  # OMP coding agent (omp.sh). Installed per-user from the nixpkgs-unstable
+  # pin; the upstream home-manager module owns the config. On every switch the
+  # declared settings are installed to ~/.omp/agent/config.yml as a writable
+  # copy (omp locks + rewrites the file at runtime), so runtime changes made
   # inside omp (/settings) are overwritten by these values next switch.
   # Migrated verbatim from the live config.yml on 2026-09-18.
   programs.omp = {
@@ -72,9 +66,9 @@
     };
   };
 
-  # OpenCode 2 CLI (opencode.ai). Installed per-user here (not in the system
-  # "ai" group, which is Linux-only) so the Mac gets it too. The package comes
-  # from the same nixpkgs-unstable pin as omp/herdr — nixpkgs now carries
+  # OpenCode 2 CLI (opencode.ai). Installed per-user here (not in a system
+  # group, which is Linux-only) so the Mac gets it too. The package comes
+  # from the same nixpkgs-unstable pin as omp — nixpkgs now carries
   # opencode v2, so no repo-local overlay is needed; its wrapper also sets
   # OPENCODE_DISABLE_AUTOUPDATE, so the version is whatever that pin holds.
   # No settings here on purpose: the module writes ~/.config/opencode/

@@ -25,7 +25,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   docker group, `browsers` → firefox module (package follows the group's
   source), `backup` → `services.restic.backups`.
 - `common/pkg-groups.nix` — the named groups. Headless-safe: `core`
-  (gh/neovim/vim/curl/jq), `dev`, `net`, `langs`, `ai`, `containers`,
+  (gh/neovim/vim/curl/jq), `dev`, `net`, `langs`, `containers`,
   `tools`, `backup`. Desktop-only: `browsers`, `graphics`, `media`, `office`,
   `dev-gui`, `remote`, `terminals`, `chat`. `environment.systemPackages` is
   built entirely from groups — never list bare packages there (the only
@@ -37,8 +37,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   oh-my-zsh, `programs.omp` settings, `programs.opencode` (binary only, from
   `nixpkgs-unstable`), the custom GGPC provider rendered
   into `~/.omp/agent/models.yml` by `home.file`, and the per-user
-  `unstablePkgs.herdr` + `unstablePkgs.opencode-desktop` +
-  `unstablePkgs.eas-cli`.
+  `unstablePkgs.opencode-desktop` + `unstablePkgs.eas-cli`.
 - omp (oh-my-pi, omp.sh) is NOT a package group: it is installed per-user via
   home-manager — `programs.omp` in `common/home.nix`, package from
   `nixpkgs-unstable`, module from the `omp` flake input. `programs.omp.settings`
@@ -92,8 +91,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
 - `lib.meta.availableOn pkgs.stdenv.hostPlatform` drops the members nixpkgs
   marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`) instead of a
   hand-kept darwin subset — verified against the locked pin. Excluded on
-  purpose: `containers` (no docker daemon on darwin) and `ai` (its only member,
-  `herdr`, reaches the Mac through `common/home.nix` from the unstable pin).
+  purpose: `containers` (no docker daemon on darwin).
   The Mac's pkgs imports therefore need no repo-local overlay.
 - Deploy: `home-manager switch --flake ~/git/nixos-config#perry-mac`.
 - Verify from either Linux host (darwin configs evaluate fine there; they
@@ -134,16 +132,13 @@ No CI, no test suite, no linter — nix parse/eval is the check.
 - `perry.unstableGroups` (same group names) takes groups from the rolling
   `nixpkgs-unstable` input (pinned in `flake.lock`); they're removed from the
   stable set and installed exactly once. Both hosts currently track
-  `[ "terminals" "chat" "ai" "langs" "dev-gui" "remote" "dev" ]`.
+  `[ "terminals" "chat" "langs" "dev-gui" "remote" "dev" ]`.
 - `browsers` stays on the stable pin on purpose: Brave's bundled Qt shim
   (theme/file dialogs) resolves platform plugins through the session's
   `QT_PLUGIN_PATH`, so it must link the same Qt as Plasma. Unstable's Brave
   links Qt 6.12 while 26.05's Plasma exports Qt 6.11 plugins, and the shim
   aborts at startup ("Could not load the Qt platform plugin"). Only move
   `browsers` back to unstable once both Qts match again.
-- `herdr` (in the `ai` group) exists ONLY in unstable — hosts on the
-  all-groups default must list it in `perry.unstableGroups` (both do);
-  selecting it from the stable set throws a clear error.
 - Headless hosts set `perry.systemGroups = [ "core" "dev" "containers" ]`
   (default = all groups; `core` = gh/neovim/vim/curl/jq).
 - New host: copy `hosts/perry-eb*.nix` to the new name, add
@@ -164,7 +159,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   in sync when keys change there.
 - Secrets only in gitignored `*.local.nix` / `local/` (the repo is public).
 - Commits: imperative, short, optional `scope:` prefix
-  (e.g. `chat: add slack`, `herdr: use runCommand`). Git identity comes from
+  (e.g. `chat: add slack`, `media: add yt-dlp`). Git identity comes from
   home-manager's git config — don't pass `-c user.name/-c user.email`.
 
 ## Pitfalls

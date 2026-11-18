@@ -17,18 +17,16 @@ machine to machine; per-host files hold hostname + hardware specifics.
   wiring, the `perry.systemGroups` selector, and the `perry.unstableGroups`
   selector (same group names served from the rolling unstable branch).
 - `common/pkg-groups.nix` — named package groups (`core`, `dev`, `net`,
-  `langs`, `ai`, `containers`, `tools`, `backup` are safe on any host;
+  `langs`, `containers`, `tools`, `backup` are safe on any host;
   `browsers`, `graphics`, `media`, `office`, `dev-gui`, `remote`, `terminals`,
   `chat` are desktop-only). A host picks its set with `perry.systemGroups`;
   default is all of them. Headless servers drop the GUI groups (see below).
-  `ai` (herdr) is nixpkgs-unstable-only — it must be in
-  `perry.unstableGroups`, not the stable set.
   The only packages outside the groups: `kdePackages.kate` (per-user via
   `users.users.perryh.packages` in `common/common.nix`) and the home-manager
   user packages in `common/home.nix`.
 - `common/home.nix` — shared user config via home-manager (zsh, git identity,
-  ripgrep/fzf/eza, and the per-user agent CLIs `omp` + `opencode` 2 +
-  `herdr`).
+  ripgrep/fzf/eza, the per-user agent CLIs `omp` + `opencode` 2, and
+  `eas-cli`).
 - `pkgs/` — removed. There are no repo-local derivations anymore; `dsh` was
   the last one and now comes from nowhere (uninstalled). If a package isn't in
   nixpkgs again: add `pkgs/<name>/default.nix` as an overlay and wire it into
@@ -60,7 +58,6 @@ Groups (safe on any host — including headless servers and the Mac):
 | `dev`        | git, dust, fd, pnpm, shellcheck, tree, zola                  |
 | `net`        | whois, net-tools, iputils, bind.dnsutils, mtr, netcat, nmap, iperf3, tcpdump |
 | `langs`      | go_latest, python3, ruby, rustc, cargo, nodejs_24, clang, gnumake, cmake, ninja, pkg-config, gdb |
-| `ai`         | herdr (unstable-only)                                        |
 | `containers` | docker                                                       |
 | `tools`      | p7zip, ethtool, gptfdisk, parted, testdisk, udisks, unzip    |
 | `backup`     | restic                                                       |
@@ -89,7 +86,7 @@ release branch:
 
 ```nix
 # hosts/<name>.nix — the list both hosts currently track
-perry.unstableGroups = [ "terminals" "chat" "ai" "langs" "dev-gui" "remote" "dev" ];
+perry.unstableGroups = [ "terminals" "chat" "langs" "dev-gui" "remote" "dev" ];
 ```
 
 The group is then installed exactly once, from unstable (its stable copy is
@@ -101,9 +98,6 @@ session's Qt plugins from `QT_PLUGIN_PATH`, so it must be built against the
 same Qt as Plasma — unstable's Brave (Qt 6.12) aborts at startup against
 26.05's Plasma (Qt 6.11). Browsers refresh with the OS via
 `nix flake lock --update-input nixpkgs`.
-
-Note the `ai` group (herdr) exists only in unstable — hosts that don't list
-it in `perry.unstableGroups` get a clear error if the stable set includes it.
 
 ## Mac (perry-mac)
 
@@ -128,8 +122,7 @@ machine to machine; groups the hosts track from unstable need to be listed in
 
 Members nixpkgs marks Linux-only (`iputils`, `ethtool`, `parted`, `udisks`)
 are filtered out automatically. The GUI groups stay Linux-only, and
-`containers` / `ai` are excluded on purpose (no docker daemon on darwin; `ai`'s
-only member, `herdr`, already reaches the Mac through `common/home.nix`).
+`containers` is excluded on purpose (no docker daemon on darwin).
 
 ## First boot on a machine
 
@@ -159,5 +152,5 @@ When a package isn't in nixpkgs at all, add a repo-local derivation under
 `pkgs/<name>/default.nix` as an overlay (wired into `nixpkgs.overlays` in
 `common/common.nix` and the flake's pkgs imports, referenced by name in a group
 or in `common/home.nix`). There are none today: `dsh` was the last one and was
-removed. `omp`, `opencode` and `herdr` come straight from the
+removed. `omp`, `opencode` and `eas-cli` come straight from the
 `nixpkgs-unstable` pin.

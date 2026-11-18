@@ -8,7 +8,7 @@
     # Rolling nixpkgs. Used ONLY for groups listed in perry.unstableGroups
     # (see common/common.nix) — never for the OS itself — plus the per-user
     # home.nix packages that are unstable-only or want a newer build than the
-    # stable pin (omp, herdr, opencode).
+    # stable pin (omp, opencode, eas-cli).
     #
     # Tracks the rolling branch (no pin needed: opencode comes from here and is
     # itself built from source in nixpkgs, so its bun is whatever unstable
@@ -54,9 +54,9 @@
     nixosConfigurations."perry-office" = mkHost "perry-office";
     # Mac (standalone home-manager, no NixOS host): reuses common/home.nix
     # verbatim — same home packages, omp settings + models, zsh, git identity.
-    # The same nixpkgs-unstable pin is imported for darwin, so programs.omp,
-    # programs.opencode and the home herdr resolve to the identical version as
-    # the Linux hosts. Apple Silicon — for an Intel Mac, switch both systems to
+    # The same nixpkgs-unstable pin is imported for darwin, so programs.omp
+    # and programs.opencode resolve to the identical version as the Linux
+    # hosts. Apple Silicon — for an Intel Mac, switch both systems to
     # x86_64-darwin. Groups are expanded from common/pkg-groups.nix, so no
     # repo-local packages are needed here.
     homeConfigurations.perry-mac =
@@ -92,10 +92,8 @@
               cliGroups = [ "core" "net" "tools" "backup" ];
               cliUnstableGroups = [ "langs" "dev" ];
               # Drop what nixpkgs marks Linux-only (iputils, ethtool, parted,
-              # udisks) instead of hand-maintaining a darwin subset. Excluded
-              # on purpose: `containers` (docker daemon does not apply on
-              # darwin) and `ai` (herdr is the only member and reaches the Mac
-              # through common/home.nix instead).
+              # udisks) instead of hand-maintaining a darwin subset.
+              # `containers` is excluded on purpose: no docker daemon on darwin.
               forPlatform = builtins.filter
                 (p: lib.meta.availableOn pkgs.stdenv.hostPlatform p);
               cliPackages = forPlatform
@@ -107,7 +105,8 @@
               # Install the home-manager CLI into the profile so the plain
               # `home-manager switch --flake ~/git/nixos-config#perry-mac`
               # command works, plus the CLI groups above (merges with
-              # common/home.nix's home.packages: ripgrep/fzf/eza/herdr/omp).
+              # common/home.nix's home.packages: ripgrep/fzf/eza plus the
+              # per-user agent CLIs (omp, opencode, eas-cli).
               home.packages = [ homeManagerPkgs.home-manager ] ++ cliPackages;
               nix.package = pkgs.nix;
               nix.settings.experimental-features = [ "nix-command" "flakes" ];

@@ -64,18 +64,10 @@
     pkg-config  # .pc lookups for -l/-I flags
     gdb         # debugger for the C/C++ toolchain (inert on the Mac: use lldb)
   ];
-  # herdr (AI coding-agent multiplexer) is only in nixpkgs-unstable, not the
-  # stable 26.05 pin — track it via perry.unstableGroups = [ "ai" ]. Selecting
-  # this group from the stable set errors on purpose.
-  # (omp and opencode moved out of this group entirely: both are installed
-  # per-user by home-manager — programs.omp / programs.opencode in
-  # common/home.nix, from the nixpkgs-unstable pin — so the Mac gets them too.
-  # dsh was removed along with the repo-local pkgs/ overlay.)
-  ai = [
-    (pkgs.herdr or (throw (
-      "herdr is only in nixpkgs-unstable — add \"ai\" to perry.unstableGroups"
-    )))
-  ];
+  # (The `ai` group is gone: its only member, herdr, was removed, and omp /
+  # opencode were never installed from here — both are per-user via
+  # home-manager (programs.omp / programs.opencode in common/home.nix), so
+  # the Mac gets them too. Real AI CLIs belong in home.packages, not a group.)
   # (dockerTools is a helper attrset — pullImage/buildImage functions — not a
   # package; the client itself is just `docker`. Use dockerTools.pullImage or
   # dockerTools.buildImage for image tasks.)
