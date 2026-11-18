@@ -21,6 +21,12 @@
     # build exists, so this covers every machine. Stable 26.05 only has
     # 1.15.10 here, which would drift from the unstable CLI.
     unstablePkgs.opencode-desktop
+    # Expo Application Services CLI (eas build/submit/update). The stable
+    # 26.05 pin is far behind (18.7.0 there vs 27.2.0 on unstable), so it
+    # rides the same nixpkgs-unstable pin as herdr/opencode. It is a plain
+    # Node CLI (no GUI), so per-user home.packages keeps one version on the
+    # NixOS hosts and the Mac alike.
+    unstablePkgs.eas-cli
   ];
   # OMP coding agent (omp.sh). Moved here from the system "ai" group — the
   # package tracks the same nixpkgs-unstable pin it always did; the upstream

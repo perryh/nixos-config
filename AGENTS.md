@@ -37,7 +37,8 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   oh-my-zsh, `programs.omp` settings, `programs.opencode` (binary only, from
   `nixpkgs-unstable`), the custom GGPC provider rendered
   into `~/.omp/agent/models.yml` by `home.file`, and the per-user
-  `unstablePkgs.herdr` + `unstablePkgs.opencode-desktop`.
+  `unstablePkgs.herdr` + `unstablePkgs.opencode-desktop` +
+  `unstablePkgs.eas-cli`.
 - omp (oh-my-pi, omp.sh) is NOT a package group: it is installed per-user via
   home-manager — `programs.omp` in `common/home.nix`, package from
   `nixpkgs-unstable`, module from the `omp` flake input. `programs.omp.settings`
