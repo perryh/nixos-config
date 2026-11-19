@@ -34,6 +34,28 @@
   powerManagement.cpuFreqGovernor = "powersave";
   services.upower.enable = true;
 
+  # --- memory: compressed RAM swap (zram) ---
+  # Half of RAM as a zstd-compressed swap device (~15 GiB logical on this 32 GB
+  # box, which loses a little to the 890M iGPU carve-out). The 8.8 G LUKS
+  # partition in the hardware file stays as lower-priority overflow: zram's
+  # default priority 5 beats the disk's -1, so zram fills first and the disk is
+  # a last-resort safety net rather than the primary swap. 26.05 implements
+  # this via services.zram-generator, which sets restartIfChanged = false — a
+  # rebuilt switch leaves the live device alone, so sizing changes need a
+  # reboot. Don't enable boot.zswap here too: the two are mutually exclusive.
+  zramSwap.enable = true;
+  zramSwap.memoryPercent = 50;
+  # swappiness 100 is the "swap and page cache cost the same" point on the
+  # post-5.8 0-200 scale (kernel default 60 assumes swap is slow disk I/O; see
+  # admin-guide/sysctl/vm.rst for the derivation). page-cluster = 0 disables
+  # swap readahead clustering, which buys nothing when the "read" is a RAM
+  # copy. Both are runtime sysctls, so a switch applies them without a reboot
+  # (unlike the zram sizing above).
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 100;
+    "vm.page-cluster" = 0;
+  };
+
   # laptop-only user config:
   home-manager.users.perryh = {
     # add laptop-specific home-manager config here
