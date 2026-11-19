@@ -1,5 +1,5 @@
 # perry-eb (laptop) — per-host: hostname, power, display, bluetooth, etc.
-{ ... }: {
+{ pkgs, ... }: {
   networking.hostName = "perry-eb";
 
   # Desktop GUI apps and language toolchains track nixpkgs-unstable for the
@@ -33,6 +33,36 @@
   hardware.bluetooth.enable = true;
   powerManagement.cpuFreqGovernor = "powersave";
   services.upower.enable = true;
+
+  # --- steam ---
+  # Radeon 890M: mesa/radv out of the box — no driver config needed. The
+  # programs.steam module (at our 26.05 pin f684076) already does the wiki's
+  # manual setup: hardware.graphics.enable + enable32Bit (the
+  # "glXChooseVisual failed" fix), steam-hardware gamepad udev rules, and
+  # installs steam + steam-run (FHS env for non-steam proprietary games).
+  programs.steam = {
+    enable = true;
+    # GE-Proton as a declarative compat tool (GE-Proton11-1 at this pin; the
+    # required steamcompattool output is present) — shows up per-game in
+    # Steam's compatibility menu, so no protonup-qt.
+    extraCompatPackages = [ pkgs.proton-ge-bin ];
+    # winetricks for Proton prefixes; the module installs it wired to the
+    # same compat-tools path.
+    protontricks.enable = true;
+    # MangoHud overlay on every game (the module's documented package
+    # pattern). "1", not `true`: mangohud's implicit Vulkan layer is gated by
+    # enable_environment MANGOHUD=1 at loader level.
+    package = pkgs.steam.override { extraEnv.MANGOHUD = "1"; };
+  };
+  # Feral GameMode daemon — games request CPU-governor/priority optimizations.
+  programs.gamemode.enable = true;
+  # MangoHud's Vulkan layer must be discoverable inside Steam's FHS env (which
+  # appends /run/opengl-driver*/share to XDG_DATA_DIRS) and in pressure-vessel
+  # containers — so it goes through the driver set, 64- and 32-bit.
+  hardware.graphics = {
+    extraPackages = [ pkgs.mangohud ];
+    extraPackages32 = [ pkgs.pkgsi686Linux.mangohud ];
+  };
 
   # --- memory: compressed RAM swap (zram) ---
   # Half of RAM as a zstd-compressed swap device (~15 GiB logical on this 32 GB
