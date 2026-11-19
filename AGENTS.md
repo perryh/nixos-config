@@ -48,7 +48,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `common/home.nix`, package `unstablePkgs.opencode` — nixpkgs now carries
   opencode v2 (source-built with nixpkgs' own bun), so there is no repo-local
   package anymore; its wrapper sets `OPENCODE_DISABLE_AUTOUPDATE`, so the
-  version is whatever the `nixpkgs-unstable` pin holds (2.2.6 at the current
+  version is whatever the `nixpkgs-unstable` pin holds (2.3.0 at the current
   lock; refresh with `nix flake update nixpkgs-unstable`). A temporary
   `let` override that patched the `opencode-node_modules` FOD hash (commit
   `ffb62e1`) was removed once the unstable pin carried nixpkgs' per-platform
@@ -56,7 +56,7 @@ No CI, no test suite, no linter — nix parse/eval is the check.
   `programs.opencode.settings`: the module only writes `~/.config/opencode/
   opencode.json` + `tui.json` when those options are set, and this machine's
   files are hand-written. The desktop GUI client rides the same pin as a plain
-  `home.packages` entry, `unstablePkgs.opencode-desktop` (2.2.6 on unstable;
+  `home.packages` entry, `unstablePkgs.opencode-desktop` (2.3.0 on unstable;
   stable 26.05 only has 1.15.10, so it must not come from there) — it is a GUI
   app, so it stays out of the system groups, and the darwin build exists, so
   the Mac gets it too.
@@ -191,7 +191,8 @@ No CI, no test suite, no linter — nix parse/eval is the check.
 - `common/home.nix`'s `opencode` override was removed on 2026-11-12: the
   `nixpkgs-unstable` pin now carries nixpkgs' `c399e1b7` "opencode: fix hash"
   (per-platform `outputHash` for the `opencode-node_modules` FOD), and
-  `programs.opencode.package` is plain `unstablePkgs.opencode` (2.2.6) again.
+  `programs.opencode.package` is plain `unstablePkgs.opencode` (2.3.0 at the
+  current pin).
   If the FOD ever reports "hash mismatch ... specified: xfOVcw1…" after an
   unstable bump, that is an upstream regression — re-add a `let` override with
   the build's "got" hash per platform and note the removal trigger here.
