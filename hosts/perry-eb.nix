@@ -95,6 +95,17 @@
     "vm.page-cluster" = 0;
   };
 
+  # --- network: BBR congestion control ---
+  # Congestion control only governs what this machine sends — downloads follow
+  # the remote's algorithm — so the win here is uploads and lossy paths, chiefly
+  # the phone-hotspot uplink (BBR holds its rate through loss instead of
+  # collapsing the way CUBIC does). At home on good wifi it is close to a no-op;
+  # the cost is being less fair to CUBIC flows at a shared bottleneck, which
+  # doesn't matter for a single laptop. fq_codel stays as the qdisc: BBR does
+  # its own pacing, so switching to `fq` is optional.
+  boot.kernelModules = [ "tcp_bbr" ];
+  boot.kernel.sysctl."net.ipv4.tcp_congestion_control" = "bbr";
+
   # --- scheduler: sched_ext ---
   # sched_ext is compiled into the latest kernel (verified: /sys/kernel/sched_ext
   # exists on 7.3.4, and CONFIG_SCHED_CLASS_EXT is set). scx_lavd is the AMD
