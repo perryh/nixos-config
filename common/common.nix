@@ -232,6 +232,26 @@ in
       "media.hardware-video-decoding.enabled" = true;
     };
 
+    # Brave managed policies, read from /etc/brave/policies/managed. Every name
+    # below was verified as a string in the installed brave 1.99.57 binary.
+    # HighEfficiencyMode is Chromium's "Memory Saver" (discards idle tabs);
+    # the Brave*Disabled entries stop the background services Brave otherwise
+    # starts on every launch, and BackgroundModeEnabled stops it from staying
+    # resident after the last window closes. Verify at brave://policy.
+    environment.etc."brave/policies/managed/perf.json" = lib.mkIf (lib.elem "browsers" anyEnabledGroups) {
+      text = builtins.toJSON {
+        HighEfficiencyModeEnabled = true;
+        BackgroundModeEnabled = false;
+        BraveRewardsDisabled = true;
+        BraveWalletDisabled = true;
+        BraveVPNDisabled = true;
+        BraveNewsDisabled = true;
+        BraveTalkDisabled = true;
+        TorDisabled = true;
+        BraveAIChatEnabled = false;
+      };
+    };
+
     # --- shared user/home config via home-manager ---
     home-manager.useGlobalPkgs = true;
     home-manager.useUserPackages = true;
