@@ -29,6 +29,15 @@
     fsType = "nfs";
     options = [ "noauto" "x-systemd.automount" "x-systemd.idle-timeout=600" "vers=3" ];
   };
+
+  # --- storage: btrfs transparent compression ---
+  # The generated hardware entry for / sets no mount options, and
+  # fileSystems.*.options is a merging nonEmptyListOf, so this appends rather
+  # than replaces. Only new writes compress (the 240 G already there stays
+  # as-is); do NOT defrag /nix/store to catch up — store paths are read-only
+  # and defrag breaks shared extents, which can *increase* usage.
+  fileSystems."/".options = [ "compress=zstd:3" ];
+
   # --- laptop-only stuff ---
   hardware.bluetooth.enable = true;
   powerManagement.cpuFreqGovernor = "powersave";
@@ -85,6 +94,19 @@
     "vm.swappiness" = 100;
     "vm.page-cluster" = 0;
   };
+
+  # --- scheduler: sched_ext ---
+  # sched_ext is compiled into the latest kernel (verified: /sys/kernel/sched_ext
+  # exists on 7.3.4, and CONFIG_SCHED_CLASS_EXT is set). scx_lavd is the AMD
+  # low-latency scheduler aimed at laptops: it parks idle CPUs and reduces
+  # wakeup latency while keeping the power-aware EPP behaviour under
+  # power-profiles-daemon. `rustscheds` is the minimal package that carries it
+  # (scx_lavd lives there, not in cscheds) — `full` would build every scheduler.
+  # If build throughput or battery life regresses, flip enable to false and
+  # compare; the service hot-swaps without a reboot.
+  services.scx.enable = true;
+  services.scx.package = pkgs.scx.rustscheds;
+  services.scx.scheduler = "scx_lavd";
 
   # laptop-only user config:
   home-manager.users.perryh = {

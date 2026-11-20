@@ -43,6 +43,12 @@
   powerManagement.cpuFreqGovernor = "powersave";
   services.upower.enable = true;
 
+  # --- storage: btrfs transparent compression ---
+  # The generated hardware entry for / sets no mount options, and
+  # fileSystems.*.options is a merging nonEmptyListOf, so this appends rather
+  # than replaces. Only new writes compress; older data stays as-is.
+  fileSystems."/".options = [ "compress=zstd:3" ];
+
   # --- memory: compressed RAM swap (zram) ---
   # Half of RAM as a zstd-compressed swap device. The LUKS swap partition in
   # the hardware file stays as lower-priority overflow: zram's default

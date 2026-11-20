@@ -74,6 +74,17 @@ in
     # Enable nix-command + flakes declaratively (managed /etc/nix/nix.conf)
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+    # Housekeeping: the store only grows with each flake update/rebuild and
+    # nothing was reclaiming it (244 G before this was added). `optimise`
+    # dedupes store paths on a timer; it supersedes nix.settings
+    # .auto-optimise-store, which runs on every store add and slows builds.
+    nix.gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    nix.optimise.automatic = true;
+
     # Latest kernel (mkDefault: hosts can override, e.g. perry-office pins the
     # distro default because the nvidia module lags bleeding-edge kernels)
     boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
@@ -212,6 +223,14 @@ in
     programs.firefox.package =
       if lib.elem "browsers" config.perry.unstableGroups
       then unstablePkgs.firefox else pkgs.firefox;
+    # Hardware video decode via VA-API: the GPU (radeonsi on perry-eb, nvidia on
+    # perry-office) handles VP9/H.264 instead of the CPU, which is the largest
+    # sustained power draw when watching video on battery. The driver side is
+    # already there (radeonsi_drv_video.so ships with hardware.graphics).
+    programs.firefox.preferences = {
+      "media.ffmpeg.vaapi.enable" = true;
+      "media.hardware-video-decoding.enabled" = true;
+    };
 
     # --- shared user/home config via home-manager ---
     home-manager.useGlobalPkgs = true;
